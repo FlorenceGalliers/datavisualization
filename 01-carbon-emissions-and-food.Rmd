@@ -1,0 +1,22 @@
+---
+title: "01-carbon-emissions-and-food"
+author: "Florence Galliers"
+date: "17/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This dataset contains information about 130 countries, their consumption and 
+
+
+```{r cars}
+
+```
+
+## Including Plots
+
