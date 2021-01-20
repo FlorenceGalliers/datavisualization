@@ -7,16 +7,40 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ## Introduction
 
-This dataset contains information about 130 countries, their consumption and 
+This dataset contains information about 130 countries, their consumption and emissions of 11 types of food.
 
 
-```{r cars}
+```{r }
+food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
+
+# How many countries?
+unique(food_consumption$country)
+# 130
+
+# How many food categories?
+unique(food_consumption$food_category)
+# 11
+
+food_consumption$difference <- food_consumption$co2_emmission - food_consumption$consumption
+
+# Biggest differences between consumption and emisisons
+
+tail(sort(food_consumption$difference), 5)
+head(sort(food_consumption$difference), 5)
+
+top10 <- food_consumption %>%
+  filter(food_consumption$difference >= 989 | food_consumption$difference <= -132)
+
+
+ggplot(data = top10,
+       aes(x = reorder(country, -difference), y = difference)) +
+  geom_bar(stat = "identity")
 
 ```
 
-## Including Plots
 
