@@ -8,6 +8,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(ggplot2)
+library(extrafont)
+#font_import()
 ```
 
 ## Introduction
@@ -28,19 +31,139 @@ unique(food_consumption$food_category)
 
 food_consumption$difference <- food_consumption$co2_emmission - food_consumption$consumption
 
-# Biggest differences between consumption and emisisons
-
+# Biggest differences between consumption and emissions, both positive and negative?
 tail(sort(food_consumption$difference), 5)
 head(sort(food_consumption$difference), 5)
 
 top10 <- food_consumption %>%
   filter(food_consumption$difference >= 989 | food_consumption$difference <= -132)
 
+top10$food_category <- as.factor(top10$food_category)
 
 ggplot(data = top10,
-       aes(x = reorder(country, -difference), y = difference)) +
+       aes(x = reorder(country, -difference), y = difference), 
+       fill = food_category) +
   geom_bar(stat = "identity")
 
 ```
 
+Consumption and Emissions of each food category for one country?
+
+```{r}
+plot(food_consumption$co2_emmission, 
+     food_consumption$consumption)
+
+```
+
+
+
+Consumption per food category?
+
+```{r}
+
+ggplot(data = food_consumption,
+       aes(x = reorder(food_category, consumption),
+       y = consumption)) +
+  labs(title = "World Food Categories",
+       subtitle = "Distribution of food consumption throughout the world",
+       caption = "Source = nu3 Food Carbon Footprint Index 2018") +
+  geom_boxplot() +
+  theme_classic() +
+  theme(axis.text.x = element_text(),
+        axis.title.x = element_text()) 
+
+
+```
+
+Battle of the animals
+- Which meat is consumed most widely across the world, and which contributes the most CO2 emissions?
+
+```{r}
+# filter the dataset to only contain meat categories:
+
+meat <- food_consumption %>%
+  filter(food_category == "Pork" | food_category == "Poultry" | food_category == "Beef" | food_category == "Lamb & Goat" | food_category == "Fish")
+
+meat$food_category <- as.factor(meat$food_category)
+
+ggplot(meat, 
+       aes(x = reorder(food_category, consumption), 
+           y = consumption)) +
+  geom_bar(stat = "identity") +
+  coord_flip()
+  
+
+# what about combining consumption and emissions onto one plot?
+# first need to tidy data
+
+meat_tidy <- meat %>%
+  pivot_longer(names(meat)[3:4],
+               names_to = "type",
+               values_to = "kg")
+
+ggplot(meat_tidy, 
+       aes(fill = type, x = food_category, y = kg)) +
+  geom_bar(stat = "identity",
+           position = "dodge") +
+  coord_flip()
+
+# looks fine but maybe using the 'difference' category would be better.
+
+ggplot(meat, 
+       aes(x = reorder(food_category, difference), 
+           y = difference)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "BATTLE OF THE ANIMALS",
+       subtitle = "The difference between consumption of meat (kg/person/year) 
+and their carbon emissions (kg CO2/person/year) worldwide")
+
+# now change colour of highest point so we can label it
+argentina <- meat %>%
+  filter(country == "Argentina" & food_category == "Beef")
+# add this to plot
+
+# remove this point from main data set
+which.max(meat$difference) #3
+meat_edit <- meat[-3, ]
+
+# try a strip chart instead?
+plot1 <- ggplot(meat_edit, 
+       aes(x = reorder(food_category, difference), 
+           y = difference, 
+           size = consumption)) +
+  geom_point(position = position_jitter(seed = 42)) +
+  coord_flip() +
+  labs(title = "Argentinian Beef emissions are over 
+30x higher than consumption levels",
+       subtitle = "Points show the difference between the consumption of meat (kg/person/year) 
+and the carbon emissions produced (kg CO2/person/year) worldwide. The further 
+to the right a point is, the higher the emissions are in comparison to consumption.",
+x = "Difference") +
+  theme(plot.title = element_text(family = "Arial Black", size = 14, colour = "#840a35"),
+        plot.subtitle = element_text(family = "Arial", size = 10),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(family = "Arial"),
+        plot.background = element_rect(fill = "#f1f1f1"),
+        panel.background = element_rect(fill = "#f1f1f1"),
+        panel.grid = element_blank()) +
+   geom_point(data = argentina, position = position_jitter(seed = 41), 
+             colour = "#840a35") +
+  annotate("curve",
+    xend = 4.65, yend = 1635,
+    x = 4.2, y = 1500,
+    curvature = .2,
+    arrow = arrow(type = "closed", length = unit(0.40, "lines")),
+    colour = "#840a35") +
+  annotate("text", x = 4.2, y = 1375,
+           label = "ARGENTINA",
+           colour = "#840a35",
+           size = 2.5,
+           family = "Arial Black")
+
+plot1
+ 
+
+
+```
 
