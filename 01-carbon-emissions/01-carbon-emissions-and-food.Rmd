@@ -134,19 +134,25 @@ plot1 <- ggplot(meat_edit,
            size = consumption)) +
   geom_point(position = position_jitter(seed = 42)) +
   coord_flip() +
-  labs(title = "Argentinian Beef emissions are over 
-30x higher than consumption levels",
-       subtitle = "Points show the difference between the consumption of meat (kg/person/year) 
-and the carbon emissions produced (kg CO2/person/year) worldwide. The further 
-to the right a point is, the higher the emissions are in comparison to consumption.",
-x = "Difference") +
-  theme(plot.title = element_text(family = "Arial Black", size = 14, colour = "#840a35"),
-        plot.subtitle = element_text(family = "Arial", size = 10),
+  labs(title = "Argentinian Beef emissions are over 30x higher than consumption levels",
+       subtitle = "Points show the difference between the carbon emissions produced (kg CO2/person/year) by meat production, and the level of 
+consumption of those meats (kg/person/year) in each country. The further to the right a point is, the higher the emissions are in 
+comparison to consumption.") +
+  ylab("Difference between emissions and consumptions (kg/person/year)") +
+  scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
+  theme(plot.title = element_text(family = "Arial Black", 
+                                  size = 14, 
+                                  colour = "#840a35",
+                                  hjust= 0.5),
+        plot.subtitle = element_text(family = "Arial", 
+                                     size = 10,
+                                     hjust = 0.5),
         axis.title.y = element_blank(),
         axis.title.x = element_text(family = "Arial"),
         plot.background = element_rect(fill = "#f1f1f1"),
         panel.background = element_rect(fill = "#f1f1f1"),
-        panel.grid = element_blank()) +
+        panel.grid = element_blank(),
+        axis.ticks = element_blank()) +
    geom_point(data = argentina, position = position_jitter(seed = 41), 
              colour = "#840a35") +
   annotate("curve",
@@ -155,10 +161,10 @@ x = "Difference") +
     curvature = .2,
     arrow = arrow(type = "closed", length = unit(0.40, "lines")),
     colour = "#840a35") +
-  annotate("text", x = 4.2, y = 1375,
+  annotate("text", x = 4.2, y = 1425,
            label = "ARGENTINA",
            colour = "#840a35",
-           size = 2.5,
+           size = 3,
            family = "Arial Black")
 
 plot1
