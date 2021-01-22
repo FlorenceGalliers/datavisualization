@@ -134,22 +134,21 @@ plot1 <- ggplot(meat_edit,
            size = consumption)) +
   geom_point(position = position_jitter(seed = 41)) +
   coord_flip() +
-  labs(title = "ARGENTINIAN BEEF EMISSIONS ARE 30 TIME THEIR CONSUMPTION LEVELS") +
-  ylab("Difference between emissions and consumptions (kg/person/year)") +
+  labs(title = "Worldwide Meat Consumption and Emissions") +
+  ylab("CO2 emissions (kg CO2/person/year)") +
   scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
   theme(plot.title = element_text(family = "Arial Black", 
                                   size = 14, 
                                   colour = "#840a35",
                                   hjust= 0.5),
-        plot.subtitle = element_text(family = "Arial", 
-                                     size = 10,
-                                     hjust = 0.5),
         axis.title.y = element_blank(),
         axis.title.x = element_text(family = "Arial"),
         plot.background = element_rect(fill = "#f1f1f1"),
         panel.background = element_rect(fill = "#f1f1f1"),
         panel.grid = element_blank(),
-        axis.ticks = element_blank()) +
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(angle = 90, hjust=0.5, vjust = -8,
+                                   face = "bold")) +
    geom_point(data = argentina, position = position_jitter(seed = 41), 
              colour = "#840a35") +
   annotate("curve",
@@ -158,10 +157,10 @@ plot1 <- ggplot(meat_edit,
     curvature = .2,
     arrow = arrow(type = "closed", length = unit(0.40, "lines")),
     colour = "#840a35") +
-  annotate("text", x = 4.2, y = 1520,
+  annotate("text", x = 4.1, y = 1520,
            label = "ARGENTINA",
            colour = "#840a35",
-           size = 3,
+           size = 3.5,
            family = "Arial Black")
 
 plot1
