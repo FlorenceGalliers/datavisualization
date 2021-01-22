@@ -129,15 +129,12 @@ meat_edit <- meat[-3, ]
 
 # try a strip chart instead?
 plot1 <- ggplot(meat_edit, 
-       aes(x = reorder(food_category, difference), 
-           y = difference, 
+       aes(x = reorder(food_category, co2_emmission), 
+           y = co2_emmission, 
            size = consumption)) +
-  geom_point(position = position_jitter(seed = 42)) +
+  geom_point(position = position_jitter(seed = 41)) +
   coord_flip() +
-  labs(title = "Argentinian Beef emissions are over 30x higher than consumption levels",
-       subtitle = "Points show the difference between the carbon emissions produced (kg CO2/person/year) by meat production, and the level of 
-consumption of those meats (kg/person/year) in each country. The further to the right a point is, the higher the emissions are in 
-comparison to consumption.") +
+  labs(title = "ARGENTINIAN BEEF EMISSIONS ARE 30 TIME THEIR CONSUMPTION LEVELS") +
   ylab("Difference between emissions and consumptions (kg/person/year)") +
   scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
   theme(plot.title = element_text(family = "Arial Black", 
@@ -156,12 +153,12 @@ comparison to consumption.") +
    geom_point(data = argentina, position = position_jitter(seed = 41), 
              colour = "#840a35") +
   annotate("curve",
-    xend = 4.65, yend = 1635,
-    x = 4.2, y = 1500,
+    xend = 4.65, yend = 1700,
+    x = 4.2, y = 1600,
     curvature = .2,
     arrow = arrow(type = "closed", length = unit(0.40, "lines")),
     colour = "#840a35") +
-  annotate("text", x = 4.2, y = 1425,
+  annotate("text", x = 4.2, y = 1520,
            label = "ARGENTINA",
            colour = "#840a35",
            size = 3,
