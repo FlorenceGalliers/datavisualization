@@ -134,7 +134,7 @@ plot1 <- ggplot(meat_edit,
            size = consumption)) +
   geom_point(position = position_jitter(seed = 41)) +
   coord_flip() +
-  labs(title = "Worldwide Meat Consumption and Emissions") +
+  labs(title = "Which meat produces the most carbon emissions?") +
   ylab("CO2 emissions (kg CO2/person/year)") +
   scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
   theme(plot.title = element_text(family = "Arial Black", 
