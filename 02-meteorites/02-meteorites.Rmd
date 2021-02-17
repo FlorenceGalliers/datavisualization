@@ -7,24 +7,132 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(ggplot2)
+library(extrafont)
+library(showtext)
+#font_import()
 ```
 
-## R Markdown
+Meteorite Data Set contains information about where and when meteorites were found or fell. There is a difference between a 'found' meteorite and a 'fell' meteorite. Those that are classified as 'fell' are those which were seen falling from the sky and later tracked down successfully, whereas those which were 'found' do not have a exact date or location of their falling.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+meteorites <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-11/meteorites.csv")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# start by summarising the count of meteorites per year
+meteorites_total <- meteorites %>%
+  group_by(year) %>%
+  summarise(Count = n())
+# plot
+plot(x = meteorites_total$year,
+     y = meteorites_total$Count,
+     type = "l")
 
-```{r cars}
-summary(cars)
+# subset data for 1900 --> present
+which.max(meteorites_total$year)
+meteorites_total[265,] # this is the year 2101? in the future... 
+meteorites_total <- meteorites_total[-265, ]
+which.max(meteorites_total$year)
+meteorites_total[264,] # the most recent is now 2013.
+
+# subset data 1900-2013
+meteorites_total <- meteorites_total %>%
+  subset(year > 1900)
+# plot again
+plot(x = meteorites_total$year,
+     y = meteorites_total$Count,
+     type = "l")
+
+# still not that much happening up until 1970 - lets subset again
+meteorites_total <- meteorites_total %>%
+  subset(year > 1970)
+# plot again
+plot(x = meteorites_total$year,
+     y = meteorites_total$Count,
+     type = "l")
+
+# what about just fallen meteorites because those that were found may not have fallen in that year.
+meteorites_total2 <- meteorites %>%
+  filter(fall == "Fell") %>%
+  group_by(year) %>%
+  summarise(Count = n())
+
+plot(x = meteorites_total2$year,
+     y = meteorites_total2$Count,
+     type = "l")
+
+# again not much going on until 1750? so lets subset down
+meteorites_total2 <- meteorites_total2 %>%
+  subset(year > 1750)
+
+plot(x = meteorites_total2$year,
+     y = meteorites_total2$Count,
+     type = "l",
+     col = "black",
+     lwd = 2)
+
+# group by decade
+meteorites3 <- meteorites %>% 
+  mutate(decade = year - year%%10) %>% 
+  filter(decade>=1750, decade<=2005) %>% 
+  select(name,mass,fall, year,decade, lat,long) %>% 
+  drop_na()
+
+# filter again to just fallen meteorites
+meteorites_total3 <- meteorites3 %>%
+  filter(fall == "Fell") %>%
+  group_by(decade) %>%
+  summarise(Count = n())
+
 ```
 
-## Including Plots
+```{r}
+# Downloaded title font from (https://www.dafont.com/galaxy-1.font?text=The+Rise+and+Fall+of+Meteorites)
 
-You can also embed plots, for example:
+subtitle <- "Fallen meteorites are those that were spotted falling and later tracked, the number\nof these found worldwide between 1750 and 2010 per decade is shown here"
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+# plot
+par(bg = "grey90", xpd = NA)
+plot(x = meteorites_total3$decade,
+     y = meteorites_total3$Count,
+     type = "l",
+     col = "grey30",
+     lwd = 4,
+     xlab = "",
+     ylab = "",
+     bty = "n",
+     xaxt = "none", yaxt = "none",
+     cex.lab = 0.8, 
+     col.lab = "grey50")
+title("The Rise and Fall of Meteorites",
+      family = "Galaxy 1", 
+      cex.main = 3,
+      col.main = "grey20")
+title(ylab = "Number of meteorites",
+      line = 2, 
+      col.lab = "grey50",
+      cex.lab = 0.8)
+text(1827,90, subtitle,
+     col = "grey30")
+points(x = meteorites_total3$decade,
+       y = meteorites_total3$Count,
+       pch = 8, 
+       cex = 1.5,
+       col = "darkblue")
+axis(1, seq(1750, 2010, 10),
+     las = 1,
+     col = "grey50",
+     col.axis = "grey50",
+     tck = -0.01)
+axis(2, seq(0, 90, 10),
+     las = 2,
+     col = "grey50",
+     col.axis = "grey50",
+     cex.axis = 0.8,
+     tck = -0.01)
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

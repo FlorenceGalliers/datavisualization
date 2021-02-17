@@ -7,24 +7,73 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
 ```
 
-## R Markdown
+Malaria
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+# Get data
+tuesdata <- tidytuesdayR::tt_load('2018-11-13')
+malaria_deaths_age <- tuesdata$malaria_deaths_age
+malaria_deaths <- tuesdata$malaria_deaths
+malaria_inc <- tuesdata$malaria_inc
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Explore the datasets
+head(malaria_deaths_age)
+# 6 columns
+# X1, entity = country, code, year, age group and number of deaths
+# There are 30780 observations
 
-```{r cars}
-summary(cars)
+# How many countries?
+unique(malaria_deaths_age$code) # 197
+unique(malaria_deaths_age$entity) #228
+unique(malaria_deaths_age$age_group)
+# this should be a factor?
+malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group, 
+                                       levels = c("Under 5",
+                                                  "5-14",
+                                                  "15-49",
+                                                  "50-69",
+                                                  "70 or older"))
+
+unique(malaria_deaths_age$year)
+# year goes from 1990 to 2016
+
+# subset data for 1996
+deaths_1996 <- malaria_deaths_age %>%
+  filter(year == "1996")
+# subset for 2006
+deaths_2006 <- malaria_deaths_age %>%
+  filter(year == "2006")
+# subset for 2016
+deaths_2016 <- malaria_deaths_age %>%
+  filter(year == "2016")
+
+boxplot(deaths ~ year*age_group, data = deaths_1996)
+
+# subset data for all three years
+deaths_subset <- malaria_deaths_age %>%
+  filter(year == "2016" | year == "2006" | year == "1996")
+
+boxplot(deaths ~ year*age_group, data = deaths_subset)
+
+
 ```
 
-## Including Plots
+```{r}
+# ggplot 
 
-You can also embed plots, for example:
+nigeria <- malaria_deaths_age %>%
+  filter(entity == "Nigeria")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+ggplot(nigeria,
+       aes(x = year,
+           y = deaths,
+           fill = age_group)) +
+  geom_area()
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
