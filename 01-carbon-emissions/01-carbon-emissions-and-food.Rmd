@@ -11,6 +11,7 @@ library(tidyverse)
 library(ggplot2)
 library(extrafont)
 #font_import()
+library(plyr)
 ```
 
 ## Introduction
@@ -47,19 +48,27 @@ ggplot(data = top10,
 
 ```
 
-Consumption and Emissions of each food category for one country?
+Consumption per food category worldwide?
+So which food category is most popular 
 
 ```{r}
-plot(food_consumption$co2_emmission, 
-     food_consumption$consumption)
 
-```
+# make category a factor
+food_consumption$food_category <- factor(food_consumption$food_category)
+
+levels(food_consumption$food_category)
+# rename some of the levels
+food_consumption$food_category <- revalue(food_consumption$food_category,
+        c("Lamb & Goat" = "Lamb/Goat",
+          "Milk - inc. cheese" = "Dairy",
+          "Nuts inc. Peanut Butter" = "Nuts",
+          "Wheat and Wheat Products" = "Wheat Products"))
+
+boxplot(consumption ~ reorder(food_category, consumption),
+        data = food_consumption,
+        xlab = "")
 
 
-
-Consumption per food category?
-
-```{r}
 
 ggplot(data = food_consumption,
        aes(x = reorder(food_category, consumption),

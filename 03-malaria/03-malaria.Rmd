@@ -10,9 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(ggplot2)
+library(viridis)
+library(rnaturalearth)
+library(countrycode)
+
 ```
 
-Malaria
+Malaria. 1990 to 2016.
+
+Three datasets are used to create these visualizations. They come from ‘Our World in Data’ and contain information about malaria incidence and deaths in every country worldwide.
 
 ```{r}
 # Get data
@@ -42,38 +48,117 @@ malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group,
 unique(malaria_deaths_age$year)
 # year goes from 1990 to 2016
 
-# subset data for 1996
-deaths_1996 <- malaria_deaths_age %>%
-  filter(year == "1996")
-# subset for 2006
-deaths_2006 <- malaria_deaths_age %>%
-  filter(year == "2006")
-# subset for 2016
-deaths_2016 <- malaria_deaths_age %>%
-  filter(year == "2016")
+# make line plot of malaria deaths by year
+world_malaria_deaths <- malaria_deaths %>%
+  subset(Entity == "World")
 
-boxplot(deaths ~ year*age_group, data = deaths_1996)
+world_malaria_deaths$deaths <- world_malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
 
-# subset data for all three years
-deaths_subset <- malaria_deaths_age %>%
-  filter(year == "2016" | year == "2006" | year == "1996")
+plot(x = world_malaria_deaths$Year,
+     y = world_malaria_deaths$deaths,
+     type = "l",
+     ylim = c(10, 180))
 
-boxplot(deaths ~ year*age_group, data = deaths_subset)
+# How many deaths are from Niger? the country with the most deaths
+niger_deaths <- malaria_deaths %>%
+  subset(Entity == "Niger")
+
+niger_deaths$deaths <- niger_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
+
+lines(x = niger_deaths$Year,
+      y = niger_deaths$deaths,
+      type = "l")
+
+# the world malaria deaths are the average, not the total.
+
+```
+
+Leaflet World Map
+
+```{r}
+library(leaflet)
+library(maps)
+
+# subset incidence data to just 2015
+inc_2015 <- malaria_inc %>%
+  subset(Year == "2015")
+
+inc_2015$incidence <- inc_2015$`Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)`
+
+# get world countries data
+world <- ne_countries(scale = "medium",
+                      returnclass = "sf")
+
+mypalette <- colorNumeric(palette = "viridis", 
+                          domain = inc_2015$incidence,
+                          na.color = "transparent")
+
+mypalette(c(45, 43))
+
+leafletmap <- leaflet(world) %>%
+  addTiles() %>%
+  setView(lat = 10, lng = 0, zoom = 2)
+
+world_countries <- map("world", fill = TRUE)
+
+leafletmap %>%
+  addPolygons(fillColor = ~mypalette(inc_2015$incidence), stroke = FALSE)
 
 
 ```
 
+
+ggplot
+
+The dataset malaria_deaths_age shows how many people in each age group died from malaria in each country around the world.
+
+Facet plot the deaths by age category for high, middle and low Socio-Demographic Index.
+
 ```{r}
-# ggplot 
+# create new data frame containing only information for high, middle and low SDI
 
-nigeria <- malaria_deaths_age %>%
-  filter(entity == "Nigeria")
+malaria_sdi <- malaria_deaths_age %>%
+  subset(entity == "High SDI" | 
+           entity == "Middle SDI" |
+           entity == "Low SDI" |
+           entity == "Low-middle SDI" |
+           entity == "High-middle SDI")
 
-ggplot(nigeria,
+# plot
+ggplot(malaria_sdi,
        aes(x = year,
            y = deaths,
            fill = age_group)) +
-  geom_area()
+  geom_area() +
+  facet_grid(. ~ entity)
+
+# there are no / minimal deaths in high, high-middle and middle SDI countries. Lets just do low and low-middle SDI.
+
+malaria_sdi2 <- malaria_deaths_age %>%
+  subset(entity == "Low SDI" |
+           entity == "Low-middle SDI")
+
+# relevel age groups so they are in age order.
+
+malaria_sdi2$age_group <- factor(malaria_sdi2$age_group,
+                                 levels = c("Under 5",
+                                            "5-14",
+                                            "15-49",
+                                            "50-69",
+                                            "70 or older"))
+# reverse order of levels so 5 and under appears on the bottom of the graph.
+malaria_sdi2$age_group <- factor(malaria_sdi2$age_group, 
+                                 levels = rev(levels(malaria_sdi2$age_group)))
+
+ggplot(malaria_sdi2,
+       aes(x = year,
+           y = deaths,
+           fill = age_group)) +
+  geom_area() +
+  facet_grid(. ~ entity)
+
+
+
+
 
 ```
-

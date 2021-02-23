@@ -13,6 +13,13 @@ library(ggplot2)
 library(extrafont)
 library(showtext)
 #font_import()
+
+library(maps)
+library(countrycode)
+library(devtools)
+devtools::install_github('rensa/ggflags')
+library(ggflags)
+library(tidyr)
 ```
 
 Meteorite Data Set contains information about where and when meteorites were found or fell. There is a difference between a 'found' meteorite and a 'fell' meteorite. Those that are classified as 'fell' are those which were seen falling from the sky and later tracked down successfully, whereas those which were 'found' do not have a exact date or location of their falling.
@@ -133,6 +140,101 @@ axis(2, seq(0, 90, 10),
      cex.axis = 0.8,
      tck = -0.01)
 
+colours()
+
+```
+
+Now for a plot using ggplot
+
+```{r}
+
+meteorites_ordered <- meteorites[order(-meteorites$mass), ]
+
+# find the top say 20 largest? and subset
+top20 <- meteorites_ordered[1:20,]
+# Convert mass from g to kg
+top20$mass <- (top20$mass/1000)
+# convert mass from kg to tonnes
+top20$mass <- (top20$mass/1000)
+
+
+ggplot(top20,
+       aes(x = reorder(name, mass),
+           y = mass,
+           fill = class)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(y = "Mass (tonnes)",
+       x = "")
+
+# get the countries for each of these top 20 meteorites.
+country <- map.where(database = "world",
+                     top20$long, 
+                     top20$lat)
+
+country # entry 2 and 16 are NAs
+
+top20$geolocation[2] # Greenland
+country[2] <- "Greenland"
+top20$geolocation[16] # Brazil
+country[16] <- "Brazil"
+
+# use country code to convert country name into iso2 code ready to use with ggflag
+country_code <- countrycode(country, 
+            "country.name",
+            "iso2c")
+
+country_code <- tolower(country_code)
+
+# bind country code with top 20 
+top20c <- cbind(top20, country_code)
+
+# now replot including flags
+ggplot(top20,
+       aes(x = reorder(name, mass),
+           y = mass,
+           fill = class,
+           label = mass)) +
+  geom_segment(aes(x = reorder(name, mass), 
+                   xend = name, 
+                   y = 0, 
+                   yend = mass),
+               colour = "white",
+               size = 3,
+               alpha = 0.2) +
+    geom_segment(aes(x = reorder(name, mass), 
+                   xend = name, 
+                   y = 0, 
+                   yend = mass),
+               colour = "white",
+               size = 1,
+               alpha = 0.8) +
+  geom_flag(aes(x = reorder(name, mass), 
+                y = -2, 
+                country = country_code), 
+            size = 6) + 
+  geom_text(
+  ) +
+  coord_flip() +
+  labs(title = "WHERE HAVE THE LARGEST METEORITES FALLEN?",
+    y = "Mass (tonnes)",
+       x = "") +
+  theme_minimal()+
+  theme(
+    axis.text.y = element_text(hjust = 0,
+                               colour = "white",
+                               family = "Avenir"),
+    plot.background = element_rect(fill = "#003f5c"),
+    plot.title = element_text(colour = "white",
+                              family = "Avenir"),
+    panel.grid = element_blank()
+  )
+
+```
+
+Interactive plot: where are the meteorites in the world?
+
+```{r}
 
 ```
 
