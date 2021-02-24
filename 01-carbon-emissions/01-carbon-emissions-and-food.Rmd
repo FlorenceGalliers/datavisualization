@@ -52,34 +52,20 @@ Consumption per food category worldwide?
 So which food category is most popular 
 
 ```{r}
-
 # make category a factor
 food_consumption$food_category <- factor(food_consumption$food_category)
-
 levels(food_consumption$food_category)
 # rename some of the levels
 food_consumption$food_category <- revalue(food_consumption$food_category,
         c("Lamb & Goat" = "Lamb/Goat",
           "Milk - inc. cheese" = "Dairy",
           "Nuts inc. Peanut Butter" = "Nuts",
-          "Wheat and Wheat Products" = "Wheat Products"))
+          "Wheat and Wheat Products" = "Wheat"))
 
-boxplot(consumption ~ reorder(food_category, consumption),
+stripchart(consumption ~ reorder(food_category, consumption),
         data = food_consumption,
         xlab = "")
 
-
-
-ggplot(data = food_consumption,
-       aes(x = reorder(food_category, consumption),
-       y = consumption)) +
-  labs(title = "World Food Categories",
-       subtitle = "Distribution of food consumption throughout the world",
-       caption = "Source = nu3 Food Carbon Footprint Index 2018") +
-  geom_boxplot() +
-  theme_classic() +
-  theme(axis.text.x = element_text(),
-        axis.title.x = element_text()) 
 
 
 ```
@@ -241,7 +227,104 @@ plot1 <- ggplot(meat_edit,
            family = "Avenir")
 
 plot1
- 
+
+```
+
+Waffle plot for Shiny App
+
+```{r}
+library(ggplot2)
+devtools::install_github("hrbrmstr/waffle")
+library(waffle)
+install_fa_fonts()
+library(extrafont)
+font_import()
+
+full_argentina <- food_consumption %>%
+  filter(country == "Argentina") %>%
+  select(food_category, co2_emmission) 
+
+ggplot(full_argentina, 
+       aes(fill = food_category,
+           values = co2_emmission/10)) +
+  geom_pictogram(n_rows = 10,
+                 aes(label = food_category,
+                     values = co2_emmission,
+                     color = food_category),
+                 flip = TRUE,
+                 size = 10,
+                 make_proportional = T) +
+  scale_color_manual(
+    name = NULL,
+    values = c("darkred", "yellow", "purple", "blue", "orange", "pink", "grey80", "beige", "black"),
+    labels = c("Beef", "Eggs", "Lamb/Goat", "Dairy", "Pork", "Poultry", "Rice", "Wheat")
+  ) +
+  scale_label_pictogram(
+    name = NULL,
+    values = "shoe-prints",
+    labels = c("Beef", "Eggs", "Lamb/Goat", "Dairy", "Pork", "Poultry", "Rice", "Wheat")
+  ) +
+  coord_equal()
+
+fa_list()
+
+```
+
+
+```{r}
+ggplot(full_argentina, 
+            aes(fill = food_category,
+                values = co2_emmission/10)) +
+       geom_pictogram(n_rows = 10,
+                      aes(label = food_category,
+                          values = co2_emmission,
+                          color = food_category),
+                      flip = TRUE,
+                      size = 10,
+                      make_proportional = T) +
+   scale_label_pictogram(
+         name = NULL,
+         values = "shoe-prints",
+         labels = c("Beef",
+                    "Eggs",
+                    "Fish",
+                    "Lamb/Goat",
+                    "Dairy",
+                    "Nuts",
+                    "Pork",
+                    "Poultry",
+                    "Rice",
+                    "Soybean",
+                    "Wheat")
+       ) +
+       scale_color_manual(
+         name = NULL,
+         values = c("#d12771",
+                    "#d2a106",
+                    "#4589ff",
+                    "#d4bbff",
+                    "#33b1ff",
+                    "#ba4e00",
+                    "#ff7eb6",
+                    "#d12771",
+                    "#08bdba",
+                    "#007d79",
+                    "#8a3ffc"),
+         labels = c("Beef",
+                    "Eggs",
+                    "Fish",
+                    "Lamb/Goat",
+                    "Dairy",
+                    "Nuts",
+                    "Pork",
+                    "Poultry",
+                    "Rice",
+                    "Soybean",
+                    "Wheat")
+       ) +
+       coord_equal() +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
 
 
 ```
