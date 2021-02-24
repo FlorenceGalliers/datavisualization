@@ -91,7 +91,7 @@ Battle of the animals
 # filter the dataset to only contain meat categories:
 
 meat <- food_consumption %>%
-  filter(food_category == "Pork" | food_category == "Poultry" | food_category == "Beef" | food_category == "Lamb & Goat" | food_category == "Fish")
+  filter(food_category == "Pork" | food_category == "Poultry" | food_category == "Beef" | food_category == "Lamb/Goat" | food_category == "Fish")
 
 meat$food_category <- as.factor(meat$food_category)
 
@@ -101,7 +101,6 @@ ggplot(meat,
   geom_bar(stat = "identity") +
   coord_flip()
   
-
 # what about combining consumption and emissions onto one plot?
 # first need to tidy data
 
@@ -127,50 +126,133 @@ ggplot(meat,
        subtitle = "The difference between consumption of meat (kg/person/year) 
 and their carbon emissions (kg CO2/person/year) worldwide")
 
-# now change colour of highest point so we can label it
+# subset for each type of meat and find the highest value
+beef <- meat %>%
+  filter(food_category == "Beef")
+beef[which.max(beef$co2_emmission), ]
+argentina_value <- as.numeric(beef[which.max(beef$co2_emmission), 4])
+
+lamb <- meat %>%
+  filter(food_category == "Lamb/Goat")
+lamb[which.max(lamb$co2_emmission), ]
+iceland_value <- as.numeric(lamb[which.max(lamb$co2_emmission), 4])
+
+fish <- meat %>%
+  filter(food_category == "Fish")
+fish[which.max(fish$co2_emmission), ]
+maldives_value <- as.numeric(fish[which.max(fish$co2_emmission), 4])
+
+pork <- meat %>%
+  filter(food_category == "Pork")
+pork[which.max(pork$co2_emmission), ]
+hongkong_value <- as.numeric(pork[which.max(pork$co2_emmission), 4])
+
+# remove these values from the meat_edit dataset
+meat_edit <- meat[-(which(meat$co2_emmission == argentina_value | 
+        meat$co2_emmission == iceland_value |
+        meat$co2_emmission == maldives_value |
+        meat$co2_emmission == hongkong_value)), ]
+
+# subset each value into its own data frame so it can be plotted separately.
 argentina <- meat %>%
   filter(country == "Argentina" & food_category == "Beef")
-# add this to plot
+# Iceland - Lamb/Goat
+iceland <- meat %>%
+  filter(country == "Iceland" & food_category == "Lamb/Goat")
+# Maldives - Fish
+maldives <- meat %>%
+  filter(country == "Maldives" & food_category == "Fish")
+# Hong Kong - Pork
+hongkong <- meat %>%
+  filter(country == "Hong Kong SAR. China" & food_category == "Pork")
 
-# remove this point from main data set
-which.max(meat$difference) #3
-meat_edit <- meat[-3, ]
-
-# try a strip chart instead?
+# Plot a strip chart
 plot1 <- ggplot(meat_edit, 
        aes(x = reorder(food_category, co2_emmission), 
            y = co2_emmission, 
            size = consumption)) +
-  geom_point(position = position_jitter(seed = 41)) +
+  geom_point(position = position_jitter(seed = 41),
+             colour = "grey70") +
   coord_flip() +
-  labs(title = "Which meat produces the most carbon emissions?") +
+  labs(title = "Which countries are responsible for the highest CO2 emissions?") +
   ylab("CO2 emissions (kg CO2/person/year)") +
   scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
-  theme(plot.title = element_text(family = "Arial Black", 
-                                  size = 14, 
-                                  colour = "#840a35",
-                                  hjust= 0.5),
+  theme(plot.title = element_text(family = "Avenir", 
+                                  size = 16, 
+                                  colour = "#840a35"),
         axis.title.y = element_blank(),
-        axis.title.x = element_text(family = "Arial"),
+        axis.title.x = element_text(family = "Avenir",
+                                    size = 8),
         plot.background = element_rect(fill = "#f1f1f1"),
         panel.background = element_rect(fill = "#f1f1f1"),
         panel.grid = element_blank(),
         axis.ticks = element_blank(),
         axis.text.y = element_text(angle = 90, hjust=0.5, vjust = -8,
-                                   face = "bold")) +
-   geom_point(data = argentina, position = position_jitter(seed = 41), 
+                                   face = "bold", size = 9, 
+                                   family = "Avenir"),
+        axis.text.x = element_text(family = "Avenir"),
+        legend.position = "bottom",
+        legend.text = element_text()) +
+  geom_point(data = argentina, position = position_jitter(seed = 41), 
              colour = "#840a35") +
+  geom_point(data = iceland, position = position_jitter(seed = 41), 
+             colour = "purple") +
+  geom_point(data = hongkong, position = position_jitter(seed = 41), 
+             colour = "orange") +
+  geom_point(data = maldives, position = position_jitter(seed = 41), 
+             colour = "royalblue") + 
+  # argentina arrow
   annotate("curve",
     xend = 4.65, yend = 1700,
     x = 4.2, y = 1600,
     curvature = .2,
     arrow = arrow(type = "closed", length = unit(0.40, "lines")),
     colour = "#840a35") +
-  annotate("text", x = 4.1, y = 1520,
+  # argentina text
+  annotate("text", x = 4.2, y = 1515,
            label = "ARGENTINA",
            colour = "#840a35",
-           size = 3.5,
-           family = "Arial Black")
+           size = 4,
+           family = "Avenir") +
+  # iceland arrow
+    annotate("curve",
+    xend = 3.7, yend = 780,
+    x = 3.2, y = 950,
+    curvature = -.2,
+    arrow = arrow(type = "closed", length = unit(0.40, "lines")),
+    colour = "purple") +
+  # iceland text
+  annotate("text", x = 3.2, y = 1000,
+           label = "ICELAND",
+           colour = "purple",
+           size = 4,
+           family = "Avenir") +
+  # hong kong arrow
+    annotate("curve",
+    xend = 2.8, yend = 300,
+    x = 2.8, y = 450,
+    curvature = .2,
+    arrow = arrow(type = "closed", length = unit(0.40, "lines")),
+    colour = "orange") +
+  # hong kong text
+  annotate("text", x = 2.8, y = 500,
+           label = "HONG KONG",
+           colour = "orange",
+           size = 4,
+           family = "Avenir") +  
+  # maldives arrow
+    annotate("curve",
+    xend = 1.65, yend = 350,
+    x = 1.2, y = 450,
+    curvature = .2,
+    arrow = arrow(type = "closed", length = unit(0.40, "lines")),
+    colour = "royalblue") +
+  # maldives text
+  annotate("text", x = 1.2, y = 450,
+           label = "MALDIVES",
+           colour = "royalblue",
+           size = 4,
+           family = "Avenir")
 
 plot1
  

@@ -13,6 +13,8 @@ library(ggplot2)
 library(viridis)
 library(rnaturalearth)
 library(countrycode)
+library(GGally)
+library(doBy)
 
 ```
 
@@ -71,94 +73,99 @@ lines(x = niger_deaths$Year,
 
 # the world malaria deaths are the average, not the total.
 
+# Look at incidence. 2000, 2005, 2010, 2015
+# Parallel plot of African countries over time
+
+head(malaria_inc)
+# contains incidence data as a rate, per 1,000 of population at risk.
+
+# Extract just countries in continent of Africa from this?
+malaria_inc$continent <- countrycode(malaria_inc$Entity, 
+            "country.name",
+            "continent")
+
+africa_inc <- malaria_inc %>%
+  subset(continent == "Africa")
+
+head(africa_inc)
+
+# change format to wide (not tidy!) so it can be used to make a parallel plot
+africa_inc_wide <- africa_inc %>%
+  pivot_wider(names_from = "Year",
+              values_from = "Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)")
+
+head(africa_inc_wide)
+
+# calculate difference between 2015 and 2000 incidence rates
+africa_inc_wide$diff <- (africa_inc_wide$`2000`-africa_inc_wide$`2015`)
+
+# create new column to colour plot by, if difference in rate is larger than 300
+africa_inc_wide$class <- ifelse((africa_inc_wide$diff > 300), 1, 0)
+
+# which rates are the highest?
+which.maxn(africa_inc_wide$`2015`, n = 3)
+# change these to class 2
+africa_inc_wide[c(28, 5, 33), 9] <- 2
+
+# increased rates in 2015
+africa_inc_wide$diff2 <- (africa_inc_wide$`2010`-africa_inc_wide$`2015`)
+africa_inc_wide[which.min(africa_inc_wide$diff2), 9] <- 3
+
+africa_inc_wide$class <- as.factor(africa_inc_wide$class)
+
+africa_inc_subset <- africa_inc_wide %>%
+  subset(class != 0)
+
+# parallel plot
+africa_inc_wide %>%
+  ggparcoord(
+    columns = 4:7,
+    groupColumn = "class",
+    title = "Malaria Incidence Rate in African Countries",
+    scale = "globalminmax",
+    alphaLines = 1
+    ) +
+  labs(y = "Incidence per 1,000 people") +
+  scale_color_manual(values = c("grey80", "#3b990f", "#9a4c94", "#0077c7")) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 16,
+                              family = "Avenir"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 8, 
+                                family = "Avenir"),
+    panel.grid = element_blank()
+  ) +
+  scale_x_discrete(expand = c(0.1, 0.1))
+
+# try this without ggparcoord, just ggplot
+africa_inc <- africa_inc %>%
+  rename(
+    incidence = 'Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)')
+
 ```
 
-Leaflet World Map
+Deaths in Mali
+
+We have seen that the malaria incidence in Mali is the highest out of all African countries. What about deaths in Mali?
 
 ```{r}
-library(leaflet)
-library(maps)
+head(malaria_deaths_age)
 
-# subset incidence data to just 2015
-inc_2015 <- malaria_inc %>%
-  subset(Year == "2015")
+mali_deaths <- malaria_deaths_age %>%
+  subset(code == "MLI")
 
-inc_2015$incidence <- inc_2015$`Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)`
+mali_2016 <- mali_deaths %>%
+  subset(year == 2016)
 
-# get world countries data
-world <- ne_countries(scale = "medium",
-                      returnclass = "sf")
+mali_2016 <- mali_2016[, 5:6]
 
-mypalette <- colorNumeric(palette = "viridis", 
-                          domain = inc_2015$incidence,
-                          na.color = "transparent")
+mali_2016$age_group <- as.factor(mali_2016$age_group)
 
-mypalette(c(45, 43))
-
-leafletmap <- leaflet(world) %>%
-  addTiles() %>%
-  setView(lat = 10, lng = 0, zoom = 2)
-
-world_countries <- map("world", fill = TRUE)
-
-leafletmap %>%
-  addPolygons(fillColor = ~mypalette(inc_2015$incidence), stroke = FALSE)
-
-
-```
-
-
-ggplot
-
-The dataset malaria_deaths_age shows how many people in each age group died from malaria in each country around the world.
-
-Facet plot the deaths by age category for high, middle and low Socio-Demographic Index.
-
-```{r}
-# create new data frame containing only information for high, middle and low SDI
-
-malaria_sdi <- malaria_deaths_age %>%
-  subset(entity == "High SDI" | 
-           entity == "Middle SDI" |
-           entity == "Low SDI" |
-           entity == "Low-middle SDI" |
-           entity == "High-middle SDI")
-
-# plot
-ggplot(malaria_sdi,
-       aes(x = year,
-           y = deaths,
-           fill = age_group)) +
-  geom_area() +
-  facet_grid(. ~ entity)
-
-# there are no / minimal deaths in high, high-middle and middle SDI countries. Lets just do low and low-middle SDI.
-
-malaria_sdi2 <- malaria_deaths_age %>%
-  subset(entity == "Low SDI" |
-           entity == "Low-middle SDI")
-
-# relevel age groups so they are in age order.
-
-malaria_sdi2$age_group <- factor(malaria_sdi2$age_group,
-                                 levels = c("Under 5",
-                                            "5-14",
-                                            "15-49",
-                                            "50-69",
-                                            "70 or older"))
-# reverse order of levels so 5 and under appears on the bottom of the graph.
-malaria_sdi2$age_group <- factor(malaria_sdi2$age_group, 
-                                 levels = rev(levels(malaria_sdi2$age_group)))
-
-ggplot(malaria_sdi2,
-       aes(x = year,
-           y = deaths,
-           fill = age_group)) +
-  geom_area() +
-  facet_grid(. ~ entity)
-
-
+barplot(mali_2016$deaths)
 
 
 
 ```
+
