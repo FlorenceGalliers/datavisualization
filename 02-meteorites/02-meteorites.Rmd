@@ -30,7 +30,7 @@ meteorites <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience
 # start by summarising the count of meteorites per year
 meteorites_total <- meteorites %>%
   group_by(year) %>%
-  summarise(Count = n())
+  dplyr::summarise(Count = n())
 # plot
 plot(x = meteorites_total$year,
      y = meteorites_total$Count,
@@ -63,7 +63,7 @@ plot(x = meteorites_total$year,
 meteorites_total2 <- meteorites %>%
   filter(fall == "Fell") %>%
   group_by(year) %>%
-  summarise(Count = n())
+  dplyr::summarise(Count = n())
 
 plot(x = meteorites_total2$year,
      y = meteorites_total2$Count,
@@ -90,7 +90,7 @@ meteorites3 <- meteorites %>%
 meteorites_total3 <- meteorites3 %>%
   filter(fall == "Fell") %>%
   group_by(decade) %>%
-  summarise(Count = n())
+  dplyr::summarise(Count = n())
 
 ```
 
