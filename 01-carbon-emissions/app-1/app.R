@@ -25,7 +25,7 @@ footprint <- food_consumption %>%
 
 
 food_colours <- c("#e31a1c",
-                  "#ffff99",
+                  "#ffcc00",
                   "#1f78b4",
                   "#6a3d9a",
                   "#a6cee3",
@@ -52,6 +52,10 @@ footprint_total <- footprint %>%
   select(country, co2_emmission) %>%
   group_by(country) %>%
   dplyr::summarise(total = sum(co2_emmission))
+
+category_data <- c(rep(1, 11))
+
+categories <- data.frame(category_names, category_data)
 
 
 # Define a User Interface
@@ -99,13 +103,55 @@ ui <- fluidPage(
              h4(textOutput(outputId = "total2")),
              # footprint plot 2
               plotOutput(outputId = "plot2"))),
-    
-    fluidRow(
-      column(6,
-             textOutput(outputId = "text3")),
-      column(6, 
-             textOutput(outputId = "text4"))
-    )
+  
+  fluidRow(
+    column(12, align = "center",
+           actionButton("beef", "Beef", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #e31a1c; border-color: #e31a1c;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("eggs", "Eggs", 
+                        class = "btn btn-primary",
+                        style="color: black; background-color: #ffcc00; border-color: #ffcc00;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("fish", "Fish", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #1f78b4; border-color: #1f78b4;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("lamb", "Lamb/Goat", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #6a3d9a; border-color: #6a3d9a;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("dairy", "Dairy", 
+                        class = "btn btn-primary",
+                        style="color: black; background-color: #a6cee3; border-color: #a6cee3;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("nuts", "Nuts", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #b15928; border-color: #b15928;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("pork", "Pork", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #ff7f00; border-color: #ff7f00;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("poultry", "Poultry", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #fb9a99; border-color: #fb9a99;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("rice", "Rice", 
+                        class = "btn btn-primary",
+                        style="color: black; background-color: #cab2d6; border-color: #cab2d6;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("soybean", "Soybean", 
+                        class = "btn btn-primary",
+                        style="color: white; background-color: #33a02c; border-color: #33a02c;
+                        border-radius: 10px; border-width: 2px"),
+           actionButton("wheat", "Wheat", 
+                        class = "btn btn-primary",
+                        style="color: black; background-color: #b2df8a; border-color: #b2df8a;
+                        border-radius: 10px; border-width: 2px"
+           )),
+  ),
 )
 
 # Define the Server
@@ -132,7 +178,7 @@ server <- function(input, output){
                           values = co2_emmission,
                           color = food_category),
                       flip = TRUE,
-                      size = 8,
+                      size = 10,
                       make_proportional = T,
                       data = footprint[footprint$country == input$country1, 2:3]) +
        scale_label_pictogram(
@@ -173,7 +219,7 @@ server <- function(input, output){
                          values = co2_emmission,
                          color = food_category),
                      flip = T,
-                     size = 8,
+                     size = 10,
                      make_proportional = T,
                      data = footprint[footprint$country == input$country2, 2:3]) +
       scale_label_pictogram(
