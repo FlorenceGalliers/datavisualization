@@ -207,19 +207,22 @@ levels(top20c$class) <- c("Stony Chondrites",
                           "Stony-Iron")
 top20c$class <- factor(top20c$class, levels = c("Metallic (Iron)", "Stony-Iron", "Stony Chondrites")) 
 
+# create new column combining name of meteorite and year it fell
+top20c$title <- paste(top20c[ , 1],",", top20c[ , 7])
+
 # now replot including flags
 ggplot(top20c,
-       aes(x = reorder(name, mass), y = mass,
+       aes(x = reorder(title, mass), y = mass,
            fill = class)) +
-  geom_segment(aes(x = reorder(name, mass), xend = name, 
+  geom_segment(aes(x = reorder(title, mass), xend = title, 
                    y = 0, yend = mass,
                    color = class),
                size = 3, alpha = 0.2) +
-    geom_segment(aes(x = reorder(name, mass), xend = name, 
+    geom_segment(aes(x = reorder(title, mass), xend = title, 
                    y = 0, yend = mass,
                    color = class),
                size = 1, alpha = 0.8) +
-  geom_flag(aes(x = reorder(name, mass), y = 0, 
+  geom_flag(aes(x = reorder(title, mass), y = 0, 
                 country = country_code), 
             size = 6) + 
   geom_label(label = round(top20$mass, 0),
@@ -229,16 +232,17 @@ ggplot(top20c,
     show.legend = F
   ) +
   geom_label(label = "Mass in tonnes",
-             x = 8.8, y = 48,
+             x = 8.5, y = 48,
              colour = "white",
              fill = "grey60",
              family = "Avenir") +
   scale_color_manual(values = c("#8B8682", "coral", "#ffcc00")) +
   scale_fill_manual(values = c("#8B8682",  "coral", "#ffcc00")) +
-  coord_flip() +
-  labs(y = "Mass (tonnes)",
+  coord_flip(clip = "off") +
+  labs(title = "Name, Year found ---------------- Country",
+       y = "Mass (tonnes)",
        x = "") +
-  theme_minimal()+
+  theme_minimal() +
   theme(
     axis.text.y = element_text(hjust = 0,
                                colour = "#615d5b",
@@ -247,10 +251,11 @@ ggplot(top20c,
     plot.background = element_rect(fill = "white"
                                      #"#003f5c"
                                    ),
-    plot.title = element_text(colour = "black",
+    plot.title = element_text(colour = "#8B8682",
                               family = "Avenir",
-                              vjust = -30,
-                              hjust = -0.5),
+                              size = 8,
+                              vjust = 0,
+                              hjust = 0),
     panel.grid = element_blank(),
     legend.title = element_blank(),
     legend.position = c(0.77, 0.33),
@@ -265,17 +270,17 @@ ggplot(top20c,
   annotate("text",
            x = 12, 
            y = 48, 
-           label = "IRON METEORITES ARE THE\n LARGEST TO FALL",
+           label = "IRON METEORITES ARE THE\n LARGEST TO BE FOUND",
            color = "#615d5b",
            family = "Avenir",
            size = 7) +
   annotate("text",
            x = 10, 
            y = 48,
-           label = "18 out of 20 of the largest meteorites\nto fall on Earth were made of Iron",
+           label = "18 out of 20 of the largest meteorites\nto found on Earth were made of Iron",
            colour = "#8B8682",
            family = "Avenir",
-           size = 4)
+           size = 4) 
 ```
 
 Interactive plot: where are the meteorites in the world?

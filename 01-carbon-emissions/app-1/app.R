@@ -23,6 +23,9 @@ food_consumption$food_category <- revalue(food_consumption$food_category,
 footprint <- food_consumption %>%
   select(country, food_category, co2_emmission)
 
+consumption_all <- food_consumption %>%
+  select(country, food_category, consumption)
+
 
 food_colours <- c("#e31a1c",
                   "#ffcc00",
@@ -52,6 +55,11 @@ footprint_total <- footprint %>%
   select(country, co2_emmission) %>%
   group_by(country) %>%
   dplyr::summarise(total = sum(co2_emmission))
+
+consumption_total <- consumption_all %>%
+  select(country, consumption) %>%
+  group_by(country) %>%
+  dplyr::summarise(total = sum(consumption))
 
 category_data <- c(rep(1, 11))
 
@@ -152,6 +160,7 @@ ui <- fluidPage(
                         border-radius: 10px; border-width: 2px"
            )),
   ),
+  
 )
 
 # Define the Server
@@ -244,9 +253,13 @@ server <- function(input, output){
       paste("Country 1:", input$country1)
     })
   
+    
 }
 
 # Run the App
 shinyApp(ui = ui,
          server = server)
 
+
+
+fa_list()

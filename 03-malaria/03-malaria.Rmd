@@ -29,6 +29,7 @@ malaria_deaths_age <- tuesdata$malaria_deaths_age
 malaria_deaths <- tuesdata$malaria_deaths
 malaria_inc <- tuesdata$malaria_inc
 
+
 # Explore the datasets
 head(malaria_deaths_age)
 # 6 columns
@@ -164,6 +165,58 @@ mali_2016 <- mali_2016[, 5:6]
 mali_2016$age_group <- as.factor(mali_2016$age_group)
 
 barplot(mali_2016$deaths)
+
+
+
+```
+
+Leaflet map of incidence and deaths in Africa
+- slider to select year
+- coloured by severity of malaria incidence and deaths - bivariate? 
+- or just deaths..
+- chloropleth map
+- mouse over information pop up
+- label top 10 most effected countries to make them stand out
+
+```{r}
+library(leaflet)
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(countrycode)
+
+malaria_deaths_2016 <- malaria_deaths %>%
+  filter(Year == 2016)
+
+malaria_deaths_2016$deaths <- malaria_deaths_2016$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
+
+malaria_deaths_2016$iso_a2 <- countrycode(malaria_deaths_2016$Code, "iso3c", "iso2c") 
+
+africa <- world %>% 
+  filter(continent == "Africa") %>% 
+  filter(iso_a2 != "EH") %>% #remove easter sahara as NA values
+  left_join(malaria_deaths_2016, by = "iso_a2") %>% 
+  dplyr::select(Entity, Year, deaths) %>% 
+  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
+
+range(africa$deaths) # range of deaths in 2016 is 0 to 135.
+
+# create bins for colour palette
+bins <- c(0, 20, 40, 60, 80, 100, 120, 140)
+# create palette
+palette <- colorBin("YlOrRd", domain = africa$deaths, bins = bins)
+
+# create labels
+labels <- 
+
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = st_transform(africa, 4326),
+              fillColor = ~palette(deaths),
+              weight = 2,
+              color = "white", 
+              fillOpacity = 1)
 
 
 
