@@ -5,6 +5,8 @@
 
 # Packages ####
 library(shiny)
+library(leaflet)
+library(shinythemes)
 
 # Get Data ####
 tuesdata <- tidytuesdayR::tt_load('2018-11-13')
@@ -12,21 +14,40 @@ malaria_deaths_age <- tuesdata$malaria_deaths_age
 malaria_deaths <- tuesdata$malaria_deaths
 malaria_inc <- tuesdata$malaria_inc
 
+malaria_deaths$deaths <- malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
+
+malaria_deaths$iso_a2 <- countrycode(malaria_deaths$Code, "iso3c", "iso2c") 
+
+africa <- world %>% 
+  filter(continent == "Africa") %>% 
+  filter(iso_a2 != "EH") %>% #remove easter sahara as NA values
+  left_join(malaria_deaths, by = "iso_a2") %>% 
+  dplyr::select(Entity, Year, deaths) %>% 
+  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
+
 # ui
-ui <- fluidPage(
-  titlePanel("World Malaria Incidence and Death Rate Over Time"),
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("year",
-                  "Year:",
-                  min = 2000,
-                  max = 2015,
-                  step = 5,
-                  value = 2010)
-    ),
-    mainPanel(
-      leafletOutput("map")
-    )
+ui <- fluidPage(theme = shinytheme("united"),
+  titlePanel("Malaria mortality rate in Africa"),
+  fluidRow(
+    column(12,
+           sliderInput(inputId = "year",
+                       label = "Year",
+                       min = 1990,
+                       max = 2016,
+                       value = 2000,
+                       step = 1,
+                       sep = "",
+                       animate = animationOptions(
+                         interval = 1000, 
+                         loop = TRUE,
+                         playButton = "Play",
+                         pauseButton = "Pause"
+                       )))),
+  fluidRow(
+    column(12, 
+           leafletOutput(outputId = "map",
+                         width = "500px",
+                         height = "500px"))
   )
 )
 
@@ -35,12 +56,36 @@ ui <- fluidPage(
 server <- function(input, output) {
   output$map <- renderLeaflet({
     
-    inc_by_year <- filter(malaria_inc,
-                          year == input$year)
+    malaria_year <- africa %>%
+      filter(Year == input$year)
     
-    leaflet(data = inc_by_year) %>%
-      addTiles() 
-  })
+    # create bins for color palette
+    bins <- c(0, 20, 40, 60, 80, 120, 150, Inf)
+    # create palette
+    palette <- colorBin("YlOrRd", domain = africa$deaths, bins = bins)
+    
+    mytext <- paste(malaria_year$Entity,
+                    "<br/>",
+                    "Number of Deaths: ", round(malaria_year$deaths, 0),
+                    "<br/>",
+                    sep="") %>%
+      lapply(htmltools::HTML)
+    
+    leaflet() %>% 
+      addProviderTiles(providers$CartoDB.PositronNoLabels) %>% 
+      addPolygons(data = st_transform(malaria_year, 4326),
+                  fillColor = ~palette(deaths),
+                  weight = 1,
+                  color = "black", 
+                  fillOpacity = 1,
+                  label = mytext,
+                  labelOptions = labelOptions(
+                    stype = list("font-weight" = "normal",
+                                 padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto"
+                  )) 
+    })
 }
 
 # run application

@@ -41,10 +41,13 @@ top10 <- food_consumption %>%
 
 top10$food_category <- as.factor(top10$food_category)
 
-ggplot(data = top10,
-       aes(x = reorder(country, -difference), y = difference), 
-       fill = food_category) +
-  geom_bar(stat = "identity")
+plot(top10$co2_emmission, 
+     pch = 16,
+     col = "red")
+points(top10$consumption,
+       pch = 1,
+       col = "green")
+
 
 ```
 

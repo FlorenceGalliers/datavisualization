@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(dplyr)
 library(ggplot2)
 library(viridis)
 library(rnaturalearth)
@@ -89,11 +90,50 @@ africa_inc <- malaria_inc %>%
   subset(continent == "Africa")
 
 head(africa_inc)
+africa_inc <- africa_inc %>%
+  rename(incidence = 'Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)')
+
+africa_inc_high <- africa_inc %>%
+  filter(Entity == "Mali" | Entity == "Burkina Faso" | Entity == "Nigeria")
+
+africa_inc_low <- africa_inc %>%
+  filter(Entity == "Ethiopia" | Entity == "Guinea-Bissau" | Entity == "Sao Tome and Principe")
+
+
+ggplot(africa_inc, aes(x = Year, 
+                       y = incidence,
+                       group = Entity)) +
+  geom_line(color = "grey90") +
+  geom_line(data = africa_inc_high, color = "red") +
+  geom_line(data = africa_inc_low, color = "green") +
+  coord_trans(clip = "off") +
+  theme_minimal() +
+  geom_text(data = subset(africa_inc_high, Year == 2015), 
+            aes(label = Entity),
+            color = "red", 
+            x = 2016,
+            y = incidence) +
+  labs(title = "Disparity in Malaria Incidence Rates throughout Africa",
+       y = "Incidence Rate (per 1,000 people)") +
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(
+      family = "Futura Medium",
+      size = 16
+    ),
+    axis.title.y = element_text(
+      family = "Futura Medium",
+      size = 9
+    ),
+    axis.text = element_text(
+      family = "Futura Medium")) 
+
+
 
 # change format to wide (not tidy!) so it can be used to make a parallel plot
 africa_inc_wide <- africa_inc %>%
   pivot_wider(names_from = "Year",
-              values_from = "Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)")
+              values_from = "incidence")
 
 head(africa_inc_wide)
 
@@ -105,12 +145,17 @@ africa_inc_wide$class <- ifelse((africa_inc_wide$diff > 300), 1, 0)
 
 # which rates are the highest?
 which.maxn(africa_inc_wide$`2015`, n = 3)
+africa_inc_wide[28, ] # mali
+africa_inc_wide[5, ] # burkina faso
+africa_inc_wide[33, ] # nigeria
+
 # change these to class 2
 africa_inc_wide[c(28, 5, 33), 9] <- 2
 
 # increased rates in 2015
 africa_inc_wide$diff2 <- (africa_inc_wide$`2010`-africa_inc_wide$`2015`)
 africa_inc_wide[which.min(africa_inc_wide$diff2), 9] <- 3
+
 
 africa_inc_wide$class <- as.factor(africa_inc_wide$class)
 
@@ -140,10 +185,6 @@ africa_inc_wide %>%
   ) +
   scale_x_discrete(expand = c(0.1, 0.1))
 
-# try this without ggparcoord, just ggplot
-africa_inc <- africa_inc %>%
-  rename(
-    incidence = 'Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)')
 
 ```
 
@@ -155,68 +196,31 @@ We have seen that the malaria incidence in Mali is the highest out of all Africa
 head(malaria_deaths_age)
 
 mali_deaths <- malaria_deaths_age %>%
-  subset(code == "MLI")
+  subset(code == "MLI") %>%
+  dplyr::select(year, age_group, deaths)
 
-mali_2016 <- mali_deaths %>%
-  subset(year == 2016)
+plot(x = mali_deaths$year,
+     y = mali_deaths$deaths)
+polygon(x = mali_deaths$year,
+     y = mali_deaths$deaths)
 
-mali_2016 <- mali_2016[, 5:6]
+mali_deaths$age_group <- factor(mali_deaths$age_group, 
+                                       levels = c("Under 5",
+                                                  "5-14",
+                                                  "15-49",
+                                                  "50-69",
+                                                  "70 or older"))
 
-mali_2016$age_group <- as.factor(mali_2016$age_group)
+mali_deaths_wise <- mali_deaths %>%
+  pivot_wider(names_from = year,
+              values_from = deaths)
 
-barplot(mali_2016$deaths)
+mali_deaths_wise <- as.data.frame(mali_deaths_wise)
 
+rownames(mali_deaths_wise) <- c("Under 5", "70+", "5-14", "15-49", "50-69")
+mali_deaths_wise <- mali_deaths_wise[, -1]
 
-
-```
-
-Leaflet map of incidence and deaths in Africa
-- slider to select year
-- coloured by severity of malaria incidence and deaths - bivariate? 
-- or just deaths..
-- chloropleth map
-- mouse over information pop up
-- label top 10 most effected countries to make them stand out
-
-```{r}
-library(leaflet)
-library(sf)
-library(raster)
-library(dplyr)
-library(spData)
-library(countrycode)
-
-malaria_deaths_2016 <- malaria_deaths %>%
-  filter(Year == 2016)
-
-malaria_deaths_2016$deaths <- malaria_deaths_2016$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
-
-malaria_deaths_2016$iso_a2 <- countrycode(malaria_deaths_2016$Code, "iso3c", "iso2c") 
-
-africa <- world %>% 
-  filter(continent == "Africa") %>% 
-  filter(iso_a2 != "EH") %>% #remove easter sahara as NA values
-  left_join(malaria_deaths_2016, by = "iso_a2") %>% 
-  dplyr::select(Entity, Year, deaths) %>% 
-  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
-
-range(africa$deaths) # range of deaths in 2016 is 0 to 135.
-
-# create bins for colour palette
-bins <- c(0, 20, 40, 60, 80, 100, 120, 140)
-# create palette
-palette <- colorBin("YlOrRd", domain = africa$deaths, bins = bins)
-
-# create labels
-labels <- 
-
-leaflet() %>% 
-  addTiles() %>% 
-  addPolygons(data = st_transform(africa, 4326),
-              fillColor = ~palette(deaths),
-              weight = 2,
-              color = "white", 
-              fillOpacity = 1)
+barplot(mali_deaths_wise)
 
 
 
