@@ -12,6 +12,7 @@ library(ggplot2)
 library(extrafont)
 #font_import()
 library(plyr)
+library(countrycode)
 ```
 
 ## Introduction
@@ -41,7 +42,7 @@ top10 <- food_consumption %>%
 
 top10$food_category <- as.factor(top10$food_category)
 
-plot(top10$co2_emmission, 
+plot(co2_emmission ~ consumption, data = top10,
      pch = 16,
      col = "red")
 points(top10$consumption,
@@ -65,6 +66,40 @@ food_consumption$food_category <- revalue(food_consumption$food_category,
           "Nuts inc. Peanut Butter" = "Nuts",
           "Wheat and Wheat Products" = "Wheat"))
 
+# I want to colour the points by continent. so need to add a new column to the data called continent.
+
+food_consumption$continent <- countrycode(food_consumption$country, 'country.name', 'continent')
+continents <- unique(food_consumption$continent) # five continents here
+
+# create colour palette of 5 colours
+
+palette <- c("#ef476f", "#ffd166", "#06d6a0", "#118ab2", "#073b4c")
+
+colour_frame <- data.frame(continents, palette)
+
+food_plot <- merge(food_consumption, colour_frame,
+      by.x = "continent",
+      by.y = "continents",
+      all.x = T)
+
+names(food_plot)[names(food_plot) == "palette"] <- "pal"
+
+food_plot$pal <- as.factor(food_plot$pal)
+food_plot$continent <- factor(food_plot$continent)
+
+# boxplot of food consumption
+boxplot(consumption ~ reorder(food_category, consumption), 
+        data = food_plot,
+        outline = F,
+        pch = 1)
+stripchart(consumption ~ reorder(food_category, consumption), 
+           data = food_plot,
+           col = food_plot$continent,
+           vertical = T,
+           method = "jitter",
+           add = T,
+           pch = 20)
+
 
 
 ```
@@ -74,12 +109,13 @@ Battle of the animals
 
 ```{r}
 # filter the dataset to only contain meat categories:
-
 meat <- food_consumption %>%
   filter(food_category == "Pork" | food_category == "Poultry" | food_category == "Beef" | food_category == "Lamb/Goat" | food_category == "Fish")
 
+# convert food categories to factors
 meat$food_category <- as.factor(meat$food_category)
 
+# test plot to see consumption vs category
 ggplot(meat, 
        aes(x = reorder(food_category, consumption), 
            y = consumption)) +
@@ -88,26 +124,25 @@ ggplot(meat,
   
 # what about combining consumption and emissions onto one plot?
 # first need to tidy data
-
 meat_tidy <- meat %>%
   pivot_longer(names(meat)[3:4],
                names_to = "type",
                values_to = "kg")
 
+# test plot to compare consumption and emissions of different types of meat
 ggplot(meat_tidy, 
        aes(fill = type, x = food_category, y = kg)) +
   geom_bar(stat = "identity",
            position = "dodge") +
   coord_flip()
-
+# can see there is a massive difference between the two
 # looks fine but maybe using the 'difference' category would be better.
-
 ggplot(meat, 
        aes(x = reorder(food_category, difference), 
            y = difference)) +
   geom_bar(stat = "identity") +
   coord_flip() +
-  labs(title = "BATTLE OF THE ANIMALS",
+  labs(title = "",
        subtitle = "The difference between consumption of meat (kg/person/year) 
 and their carbon emissions (kg CO2/person/year) worldwide")
 
@@ -229,33 +264,16 @@ plot1
 
 ```
 
-Plotly
 
 ```{r}
-
+# subset dairy category into its own object
 dairy <- food_consumption %>%
   filter(food_category == "Dairy") %>%
-  select(country, consumption)
+  dplyr::select(country, consumption)
 
-ggplot(food_consumption, 
-       aes(x = reorder(food_category, consumption),
-           y = consumption)) +
-  geom_jitter()
-
-
-ggplot(food_consumption, 
-       aes(consumption,
-           co2_emmission)) +
-  geom_point()
-
-library(plotly)
-library(rjson)
-library(rnaturalearth)
 library(sf)
-library(cartogram)
-library(rgdal)
-library(leaflet)
 library(viridis)
+library(rnaturalearth)
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
 class(world)
@@ -269,7 +287,7 @@ europe_dairy <- world_dairy %>%
   subset(continent == "Europe")
 
 europe_labels <- europe_dairy %>%
-  select(country, geometry, consumption) %>%
+  dplyr::select(country, geometry, consumption) %>%
   filter(country != "Russia")
 
 finland_label <- europe_labels %>%
