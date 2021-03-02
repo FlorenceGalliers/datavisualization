@@ -142,8 +142,90 @@ ggplot(africa_inc, aes(x = Year,
     ) 
 
 
+# subset death data for africa
+
+malaria_deaths$continent <- countrycode(malaria_deaths$Entity, 
+            "country.name",
+            "continent")
+
+africa_deaths <- malaria_deaths %>%
+  subset(continent == "Africa") %>%
+  filter(Year == 2015)
+
+head(africa_deaths)
+africa_deaths <- africa_deaths %>%
+  rename(deaths = `Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`)
+
+africa_total <- merge(africa_inc, africa_deaths,
+                      by.x = "Entity",
+                      by.y = "Entity",
+                      all.x = T) %>%
+  dplyr::select(Entity, Year.x, incidence, deaths) %>%
+  rename("year" = "Year.x")
+
+africa_total_high <- africa_total %>%
+  filter(Entity == "Mali" | Entity == "Burkina Faso" | Entity == "Nigeria")
+
+africa_total_low <- africa_total %>%
+  filter(Entity == "Ethiopia" | Entity == "Guinea-Bissau" | Entity == "Sao Tome and Principe")
+
+africa_total_low$Entity <- gsub("Sao Tome and Principe", "Sao Tome\nand Principe", africa_total_low$Entity)
 
 
+africa_total_low
+
+
+# plot and make line widths show the number of deaths
+ggplot(africa_total, aes(x = year, 
+                       y = incidence,
+                       group = Entity, 
+                       size = deaths)) +
+  geom_line(color = "grey90",
+            alpha = 0.6) +
+  geom_line(data = africa_total_high, color = c("#C12910","#C12910","#C12910","#C12910",
+                                                "#980000", "#980000", "#980000", "#980000",
+                                                "#FB5E3C", "#FB5E3C", "#FB5E3C", "#FB5E3C"),
+            aes(size = deaths), alpha = 0.6) +
+  geom_line(data = africa_total_low, color = c("#2A9D8F", "#2A9D8F", "#2A9D8F", "#2A9D8F",
+                                               "#007362", "#007362", "#007362", "#007362",
+                                               "#64CFBF", "#64CFBF", "#64CFBF", "#64CFBF"),
+            aes(size = deaths), alpha = 0.6) +
+  coord_trans(clip = "off") +
+  theme_minimal() +
+  geom_text(data = subset(africa_total_high, year == 2015), 
+            aes(label = Entity, y = incidence),
+            color = c("#C12910", "#980000", "#FB5E3C"),
+            hjust = 0,
+            x = 2015.1,
+            family = "Futura Medium",
+            size = 4) +
+  geom_text(data = subset(africa_total_low, year == 2015), 
+            aes(label = Entity, y = incidence),
+            color = c("#2A9D8F", "#007362", "#64CFBF"), 
+            hjust = 0,
+            x = 2015.1,
+            family = "Futura Medium",
+            size = 4) +
+  labs(title = "There is a still vast disparity in Malaria incidence and death rates throughout Africa",
+       y = "Incidence Rate (per 1,000 people)") +
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(
+      family = "Futura Medium",
+      size = 16
+    ),
+    axis.title = element_text(
+      family = "Futura Medium",
+      size = 9,
+      hjust = 0.5
+    ),
+    axis.text = element_text(
+      family = "Futura Medium",
+      size = 10),
+    legend.position = c(0.9, 0.9),
+    plot.margin = unit(c(1,2,1,1), "cm")
+    
+    ) 
 
 ```
 
