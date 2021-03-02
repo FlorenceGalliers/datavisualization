@@ -16,6 +16,7 @@ library(rnaturalearth)
 library(countrycode)
 library(GGally)
 library(doBy)
+library(ggrepel)
 
 ```
 
@@ -104,16 +105,24 @@ ggplot(africa_inc, aes(x = Year,
                        y = incidence,
                        group = Entity)) +
   geom_line(color = "grey90") +
-  geom_line(data = africa_inc_high, color = "red") +
-  geom_line(data = africa_inc_low, color = "green") +
+  geom_line(data = africa_inc_high, color = "#C12910",
+            size = 1) +
+  geom_line(data = africa_inc_low, color = "#2A9D8F",
+            size = 1) +
   coord_trans(clip = "off") +
   theme_minimal() +
-  geom_text(data = subset(africa_inc_high, Year == 2015), 
-            aes(label = Entity),
-            color = "red", 
-            x = 2016,
-            y = incidence) +
-  labs(title = "Disparity in Malaria Incidence Rates throughout Africa",
+  geom_text(data = subset(africa_inc_high, Year == 2010), 
+            aes(label = Entity, y = incidence + 15),
+            color = "#C12910",
+            hjust = 0.5,
+            x = 2010,
+            family = "Futura Medium") +
+  geom_text(data = subset(africa_inc_low, Year == 2015), 
+            aes(label = Entity, y = incidence-10),
+            color = "#2A9D8F", 
+            x = 2015,
+            family = "Futura Medium") +
+  labs(title = "There is a still vast disparity in Malaria incidence rates throughout Africa",
        y = "Incidence Rate (per 1,000 people)") +
   theme(
     panel.grid = element_blank(),
@@ -121,69 +130,19 @@ ggplot(africa_inc, aes(x = Year,
       family = "Futura Medium",
       size = 16
     ),
-    axis.title.y = element_text(
+    axis.title = element_text(
       family = "Futura Medium",
-      size = 9
+      size = 9,
+      hjust = 0.5
     ),
     axis.text = element_text(
-      family = "Futura Medium")) 
+      family = "Futura Medium",
+      size = 10),
+    
+    ) 
 
 
 
-# change format to wide (not tidy!) so it can be used to make a parallel plot
-africa_inc_wide <- africa_inc %>%
-  pivot_wider(names_from = "Year",
-              values_from = "incidence")
-
-head(africa_inc_wide)
-
-# calculate difference between 2015 and 2000 incidence rates
-africa_inc_wide$diff <- (africa_inc_wide$`2000`-africa_inc_wide$`2015`)
-
-# create new column to colour plot by, if difference in rate is larger than 300
-africa_inc_wide$class <- ifelse((africa_inc_wide$diff > 300), 1, 0)
-
-# which rates are the highest?
-which.maxn(africa_inc_wide$`2015`, n = 3)
-africa_inc_wide[28, ] # mali
-africa_inc_wide[5, ] # burkina faso
-africa_inc_wide[33, ] # nigeria
-
-# change these to class 2
-africa_inc_wide[c(28, 5, 33), 9] <- 2
-
-# increased rates in 2015
-africa_inc_wide$diff2 <- (africa_inc_wide$`2010`-africa_inc_wide$`2015`)
-africa_inc_wide[which.min(africa_inc_wide$diff2), 9] <- 3
-
-
-africa_inc_wide$class <- as.factor(africa_inc_wide$class)
-
-africa_inc_subset <- africa_inc_wide %>%
-  subset(class != 0)
-
-# parallel plot
-africa_inc_wide %>%
-  ggparcoord(
-    columns = 4:7,
-    groupColumn = "class",
-    title = "Malaria Incidence Rate in African Countries",
-    scale = "globalminmax",
-    alphaLines = 1
-    ) +
-  labs(y = "Incidence per 1,000 people") +
-  scale_color_manual(values = c("grey80", "#3b990f", "#9a4c94", "#0077c7")) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    plot.title = element_text(size = 16,
-                              family = "Avenir"),
-    axis.title.x = element_blank(),
-    axis.title.y = element_text(size = 8, 
-                                family = "Avenir"),
-    panel.grid = element_blank()
-  ) +
-  scale_x_discrete(expand = c(0.1, 0.1))
 
 
 ```
