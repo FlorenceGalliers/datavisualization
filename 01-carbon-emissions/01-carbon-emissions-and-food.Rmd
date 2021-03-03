@@ -127,13 +127,18 @@ boxplot(consumption ~ reorder(food_category, -consumption),
         lwd = 0.5, # decrease line width to half
         ylab = "", yaxt = "none", # remove y axis and labels
         xlab = "", xaxt = "none", # remove x axis and labels
-        frame = F) # remove frame box around plot
+        frame = F,
+        boxwex = 1.2) # remove frame box around plot
 
 # add title to plot, and x and y axis labels
-title("Dairy, wheat and rice products are among the most widely eaten foods worldwide",
+title("       Dairy, wheat and rice products are the\nmost widely eaten foods worldwide",
       family = "Avenir",
-      ylab = "Consumption (kg/person/year)",
+      line = -3,
+      adj = 0.8)
+      
+title(ylab = "Consumption (kg/person/year)",
       xlab = "Food Category")
+
 
 # Insert y axis
 axis(2, seq(0, 350, 50), # set labels and breaks
