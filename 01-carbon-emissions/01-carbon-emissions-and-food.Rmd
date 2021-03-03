@@ -13,6 +13,7 @@ library(extrafont)
 #font_import()
 library(plyr)
 library(countrycode)
+library(dplyr)
 ```
 
 ## Introduction
@@ -31,23 +32,36 @@ unique(food_consumption$country)
 unique(food_consumption$food_category)
 # 11
 
-food_consumption$difference <- food_consumption$co2_emmission - food_consumption$consumption
+# calculate total co2 emissions for each country
+footprint_total <- food_consumption %>%
+  dplyr::select(country, co2_emmission) %>%
+  group_by(country) %>%
+  dplyr::summarise(total = sum(co2_emmission))
+
+# calculate total consumption for each country
+consumption_total <- food_consumption %>%
+  dplyr::select(country, consumption) %>%
+  group_by(country) %>%
+  dplyr::summarise(total = sum(consumption))
+
+totals <- merge(footprint_total, consumption_total,
+                by = "country")
+colnames(totals) <- c("country", "footprint", "consumption")
+
+totals$difference <- totals$footprint - totals$consumption
+head(totals)
 
 # Biggest differences between consumption and emissions, both positive and negative?
-tail(sort(food_consumption$difference), 5)
-head(sort(food_consumption$difference), 5)
+tail(sort(totals$difference), 5)
+head(sort(totals$difference), 5)
 
-top10 <- food_consumption %>%
-  filter(food_consumption$difference >= 989 | food_consumption$difference <= -132)
+top10 <- totals %>%
+  filter(totals$difference >= (tail(sort(totals$difference), 5))[1] | 
+           totals$difference <= (head(sort(totals$difference), 5))[5])
 
-top10$food_category <- as.factor(top10$food_category)
-
-plot(co2_emmission ~ consumption, data = top10,
+dotchart(sort(top10$difference), top10$country,
      pch = 16,
      col = "red")
-points(top10$consumption,
-       pch = 1,
-       col = "green")
 
 
 ```
