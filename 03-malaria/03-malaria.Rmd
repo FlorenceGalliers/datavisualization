@@ -265,10 +265,7 @@ mali_deaths <- malaria_deaths_age %>%
   subset(code == "MLI") %>%
   dplyr::select(year, age_group, deaths)
 
-plot(x = mali_deaths$year,
-     y = mali_deaths$deaths)
-polygon(x = mali_deaths$year,
-     y = mali_deaths$deaths)
+barplot(mali_deaths$deaths)
 
 mali_deaths$age_group <- factor(mali_deaths$age_group, 
                                        levels = c("Under 5",
@@ -277,18 +274,13 @@ mali_deaths$age_group <- factor(mali_deaths$age_group,
                                                   "50-69",
                                                   "70 or older"))
 
-mali_deaths_wise <- mali_deaths %>%
-  pivot_wider(names_from = year,
-              values_from = deaths)
+mali <- table(mali_deaths)
 
-mali_deaths_wise <- as.data.frame(mali_deaths_wise)
+barplot(mali_deaths$deaths)
 
-rownames(mali_deaths_wise) <- c("Under 5", "70+", "5-14", "15-49", "50-69")
-mali_deaths_wise <- mali_deaths_wise[, -1]
-
-barplot(mali_deaths_wise)
-
-
+pivot_wider(mali_deaths, 
+            names_from = age_group,
+            values_from = deaths)
 
 ```
 
