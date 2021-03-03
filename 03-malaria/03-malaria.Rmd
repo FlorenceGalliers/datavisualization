@@ -194,22 +194,29 @@ ggplot(africa_total, aes(x = year,
             show.legend = F) +
   coord_trans(clip = "off") +
   theme_minimal() +
-  geom_text(data = subset(africa_total_high, year == 2015), 
+  geom_label_repel(data = subset(africa_total_high, year == 2015), 
             aes(label = Entity, y = incidence),
+            seed = 42,
             color = c("#C12910", "#980000", "#FB5E3C"),
-            hjust = 0,
+            hjust = "left",
             x = 2015.1,
             family = "Futura Medium",
-            size = 4) +
-  geom_text(data = subset(africa_total_low, year == 2015), 
+            size = 4,
+            nudge_x = 0.2,
+            min.segment.length = Inf,
+            xlim = c(2015.2, NA)) +
+  geom_label_repel(data = subset(africa_total_low, year == 2015), 
             aes(label = Entity, y = incidence),
+            seed = 42,
             color = c("#2A9D8F", "#007362", "#64CFBF"), 
-            hjust = 0,
+            hjust = "left",
             x = 2015.1,
             family = "Futura Medium",
-            size = 4) +
+            size = 4,
+            min.segment.length = Inf,
+            xlim = c(2015.2, NA)) +
   labs(title = "There is a still vast disparity in Malaria incidence and death rates throughout Africa",
-       subtitle = "Despite some countries drastically reducing their incidence of malaria, other countries still have a rate of over 400 per 1,000 people",
+       subtitle = "Despite some countries drastically reducing the prevalence of malaria, other countries still have a yearly incidence\nrate of over 400 per 1,000 people at risk",
        y = "Incidence Rate (per 1,000 people)",
        x = "Year",
        size = "Each line represents one country in\nAfrica, with its width representing the\ndeath rate per 100,000 people in 2015") +
@@ -230,7 +237,7 @@ ggplot(africa_total, aes(x = year,
     axis.text = element_text(
       family = "Futura Medium",
       size = 10),
-    legend.position = c(0.9, 0.9),
+    legend.position = c(0.92, 0.87),
     legend.title = element_text(
       family = "Futura Medium",
       size = 10,
