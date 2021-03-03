@@ -106,45 +106,51 @@ food_plot$continent <- as.factor(food_plot$continent)
 #num_colors <- nlevels(food_plot$continent)
 #food_color_colors <- color_pallete_function(num_colors)
 
+# remove 0 values to clean up plot
+food_plot$consumption[which(food_plot$consumption == 0)] = NA
+na.omit(food_plot)
+
+
 set.seed(42)
 # boxplot of food consumption
-boxplot(consumption ~ reorder(food_category, consumption), 
+boxplot(consumption ~ reorder(food_category, -consumption), 
         data = food_plot,
         outline = F,
         pch = 1,
-        xlim = c(0.5, 11.5),
-        ylim = c(0, 350),
-        col = "white",
-        medcol = "grey60", whiskcol = "grey60", 
-        staplecol = "grey60", boxcol = "grey60", outcol = "grey60")
-# add stripcharts for each continent
-stripchart(consumption ~ reorder(food_category, consumption), 
+        xlim = c(0.5, 11.5), ylim = c(0, 350),
+        col = "grey95", medcol = "grey60", whiskcol = "grey60", 
+        staplecol = "grey60", boxcol = "grey60", outcol = "grey60",
+        lwd = 0.5)
+title("Dairy, Wheat and Rice products are among the most widely each foods worldwide",
+      family = "Didot Bold")
+ # add stripcharts for each continent
+stripchart(consumption ~ reorder(food_category, -consumption), 
            data = filter(food_plot, continent == "Africa"), 
            col = alpha(palette[1], 0.5), vertical = T,
            method = "jitter", add = T, at = 0.8:10.8,
            pch = 16, ylim = c(0, 450))
-stripchart(consumption ~ reorder(food_category, consumption), 
+stripchart(consumption ~ reorder(food_category, -consumption), 
            data = filter(food_plot, continent == "Americas"), 
            col = alpha(palette[2], 0.5), vertical = T,
            method = "jitter", add = T, at = 0.9:10.9,
            pch = 16)
-stripchart(consumption ~ reorder(food_category, consumption), 
+stripchart(consumption ~ reorder(food_category, -consumption), 
            data = filter(food_plot, continent == "Asia"), 
            col = alpha(palette[3], 0.5), vertical = T,
            method = "jitter", add = T, at = 1:11,
            pch = 16)
-stripchart(consumption ~ reorder(food_category, consumption), 
+stripchart(consumption ~ reorder(food_category, -consumption), 
            data = filter(food_plot, continent == "Europe"), 
            col = alpha(palette[4], 0.5), vertical = T,
            method = "jitter", add = T, at = 1.1:11.1,
            pch = 16)
-stripchart(consumption ~ reorder(food_category, consumption), 
+stripchart(consumption ~ reorder(food_category, -consumption), 
            data = filter(food_plot, continent == "Oceania"), 
            col = alpha(palette[5], 0.5), vertical = T,
            method = "jitter", add = T, at = 1.2:11.2,
            pch = 16)
 legend(
-  x ="topleft",
+  x ="topright",
   legend = paste(levels(food_plot$continent)),
   col = alpha(palette, 0.5),
   pch = 16, 
