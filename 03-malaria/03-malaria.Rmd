@@ -185,11 +185,13 @@ ggplot(africa_total, aes(x = year,
   geom_line(data = africa_total_high, color = c("#C12910","#C12910","#C12910","#C12910",
                                                 "#980000", "#980000", "#980000", "#980000",
                                                 "#FB5E3C", "#FB5E3C", "#FB5E3C", "#FB5E3C"),
-            aes(size = deaths), alpha = 0.6) +
+            aes(size = deaths), alpha = 0.6,
+            show.legend = F) +
   geom_line(data = africa_total_low, color = c("#2A9D8F", "#2A9D8F", "#2A9D8F", "#2A9D8F",
                                                "#007362", "#007362", "#007362", "#007362",
                                                "#64CFBF", "#64CFBF", "#64CFBF", "#64CFBF"),
-            aes(size = deaths), alpha = 0.6) +
+            aes(size = deaths), alpha = 0.6,
+            show.legend = F) +
   coord_trans(clip = "off") +
   theme_minimal() +
   geom_text(data = subset(africa_total_high, year == 2015), 
@@ -207,24 +209,40 @@ ggplot(africa_total, aes(x = year,
             family = "Futura Medium",
             size = 4) +
   labs(title = "There is a still vast disparity in Malaria incidence and death rates throughout Africa",
-       y = "Incidence Rate (per 1,000 people)") +
+       subtitle = "Despite some countries drastically reducing their incidence of malaria, other countries still have a rate of over 400 per 1,000 people",
+       y = "Incidence Rate (per 1,000 people)",
+       x = "Year",
+       size = "Each line represents one country in\nAfrica, with its width representing the\ndeath rate per 100,000 people in 2015") +
   theme(
     panel.grid = element_blank(),
     plot.title = element_text(
       family = "Futura Medium",
-      size = 16
+      size = 16),
+    plot.subtitle = element_text(
+      family = "Futura Medium",
+      size = 12,
+      color = "grey40"
     ),
     axis.title = element_text(
       family = "Futura Medium",
       size = 9,
-      hjust = 0.5
-    ),
+      hjust = 0.5),
     axis.text = element_text(
       family = "Futura Medium",
       size = 10),
     legend.position = c(0.9, 0.9),
+    legend.title = element_text(
+      family = "Futura Medium",
+      size = 10,
+      color = "grey40"
+    ),
+    legend.text = element_text(
+      family = "Futura Medium",
+      size = 10,
+      color = "grey40"
+    ),
+    legend.key.width = unit(2, "cm"),
     plot.margin = unit(c(1,2,1,1), "cm")
-    
     ) 
 
 ```
