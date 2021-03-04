@@ -113,10 +113,16 @@ na.omit(food_plot)
 # make object containing labels for boxplot, in the right order!
 xlabels <- c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Pork", "Soybeans")
 
+# make food category a factor and set the order as above.
+food_plot$food_category <- factor(food_plot$food_category, levels = c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Pork", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Soybeans"), ordered = T)
+
 set.seed(42) # so that the jitter function remains the same each time...
 
+boxplot(consumption ~ reorder(food_category, consumption),
+        data = food_consumption)
+
 # Create starting boxplot of food consumption
-boxplot(consumption ~ reorder(food_category, -consumption), 
+boxplot(consumption ~ food_category, 
         # reorder categories in decreasing consumption level
         data = food_plot,
         outline = F, # remove outlying points
@@ -137,7 +143,9 @@ title("       Dairy, wheat and rice products are the\nmost widely eaten foods wo
       adj = 0.8)
       
 title(ylab = "Consumption (kg/person/year)",
-      xlab = "Food Category")
+      xlab = "Food Category",
+      family = "Avenir",
+      line = 2.5)
 
 
 # Insert y axis
@@ -149,19 +157,19 @@ axis(2, seq(0, 350, 50), # set labels and breaks
 # Insert x axis
 axis(1, at = c(1, 2.5, 4, 5.5, 7, 8.5, 10, 11.5, 13, 14.5, 16), 
      labels = xlabels, # position and labels
-     cex.axis = 0.8, family = "Avenir", # font size and style
+     cex.axis = 0.9, family = "Avenir", # font size and style
      tick = F, # remove tick marks
-     line = -1.8 # move x axis labels up towards plot
+     line = -1.6 # move x axis labels up towards plot
      )
 
 # add strip charts for each continent
-stripchart(consumption ~ reorder(food_category, -consumption), 
+stripchart(consumption ~ food_category, 
            data = filter(food_plot, continent == "Africa"), 
            col = alpha(palette[1], 0.5), vertical = T,
            method = "jitter", add = T, 
            at = c(0.6, 2.1, 3.6, 5.1, 6.6, 8.1, 9.6, 11.1, 12.6, 14.1, 15.6), 
            pch = 16, ylim = c(0, 450))
-stripchart(consumption ~ reorder(food_category, -consumption), 
+stripchart(consumption ~ food_category, 
            data = filter(food_plot, continent == "Americas"), 
            col = alpha(palette[2], 0.5), # give points transparent effect
            vertical = T, method = "jitter", 
@@ -169,19 +177,19 @@ stripchart(consumption ~ reorder(food_category, -consumption),
            at = c(0.8, 2.3, 3.8, 5.3, 6.8, 8.3, 9.8, 11.3, 12.8, 14.3, 15.8), 
            # off-centre positions to get staggered effect
            pch = 16)
-stripchart(consumption ~ reorder(food_category, -consumption), 
+stripchart(consumption ~ food_category, 
            data = filter(food_plot, continent == "Asia"), 
            col = alpha(palette[3], 0.5), vertical = T,
            method = "jitter", add = T, 
            at = c(1, 2.5, 4, 5.5, 7, 8.5, 10, 11.5, 13, 14.5, 16), # positions in centre
            pch = 16)
-stripchart(consumption ~ reorder(food_category, -consumption), 
+stripchart(consumption ~ food_category, 
            data = filter(food_plot, continent == "Europe"), 
            col = alpha(palette[4], 0.5), vertical = T,
            method = "jitter", add = T, 
            at = c(1.2, 2.7, 4.2, 5.7, 7.2, 8.7, 10.2, 11.7, 13.2, 14.7, 16.2),
            pch = 16)
-stripchart(consumption ~ reorder(food_category, -consumption), 
+stripchart(consumption ~ food_category, 
            data = filter(food_plot, continent == "Oceania"), 
            col = alpha(palette[5], 0.5), vertical = T,
            method = "jitter", add = T, 
