@@ -391,5 +391,50 @@ Interactive plot: where are the meteorites in the world?
 
 ```{r}
 
+library(leaflet)
+
+# create bins for color palette
+bins <- c(0, 20, 40, 60, 80, 120, 150, Inf)
+# create palette
+palette <- colorBin("YlOrRd", domain = africa$deaths, bins = bins)
+    
+mytext <- paste(meteorites$name,
+                    "<br/>",
+                    meteorites$year,
+                    "<br/>",
+                    "Size (kg): ", (meteorites$mass)/1000,
+                    "<br/>",
+                    sep="") %>%
+      lapply(htmltools::HTML)
+    
+leaflet(meteorites) %>% 
+  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  setView(lat = 20, lng = 0, zoom = 1.6) %>%
+  addCircleMarkers(~long, ~lat, # Points for circles
+             fillColor = "coral", 
+             fillOpacity = 0.7, # make opaque
+             color = "white",  # colour of edge?
+             radius = ~log(mass), # radius
+             stroke = FALSE, # no edge on circles
+             weight = 1,# hmm edge of lines?
+             clusterOptions = markerClusterOptions(
+               disableClusteringAtZoom = 5,
+               spiderfyOnMaxZoom = F
+             ),
+    label = mytext, 
+    labelOptions = labelOptions(style = list("font-weight" = "normal",
+                                             padding = "3px 8px"), 
+                                textsize = "13px", 
+                                direction = "auto"))
+  
+
+       highlightOptions = highlightOptions(fillColor = "white",
+                                                 fillOpacity = 0.9,
+                                                 weight = 2,
+                                                 bringToFront = TRUE),
+
+
+
+
 ```
 
