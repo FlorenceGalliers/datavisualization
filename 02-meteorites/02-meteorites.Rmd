@@ -97,11 +97,12 @@ meteorites_total3 <- meteorites3 %>%
 ```{r}
 # Downloaded title font from (https://www.dafont.com/galaxy-1.font?text=The+Rise+and+Fall+of+Meteorites)
 
-subtitle <- "Fallen meteorites are those that were spotted falling and later tracked, the number\nof these found worldwide between 1750 and 2010 per decade is shown here"
+subtitle <- "Fallen meteorites are those that were spotted falling and later tracked, the number\nof these found worldwide per decade is shown here"
 
 
 # plot
-par(bg = "grey95", xpd = NA)
+par(bg = "white", xpd = NA)
+
 plot(x = meteorites_total3$decade,
      y = meteorites_total3$Count,
      type = "l",
@@ -113,34 +114,49 @@ plot(x = meteorites_total3$decade,
      xaxt = "none", yaxt = "none",
      cex.lab = 0.8, 
      col.lab = "grey50")
+
+# add title
 title("The Rise and Fall of Meteorites",
       family = "Galaxy 1", 
       cex.main = 3,
       col.main = "grey20")
+
+# add y axis title
 title(ylab = "Number of meteorites",
       line = 2, 
       col.lab = "grey50",
       cex.lab = 0.8)
+
+# add subtitle
 text(1827,90, subtitle,
      col = "grey30")
+
+# add points
 points(x = meteorites_total3$decade,
        y = meteorites_total3$Count,
        pch = 8, 
        cex = 1.5,
-       col = "darkblue")
-axis(1, seq(1750, 2010, 10),
-     las = 1,
-     col = "grey50",
-     col.axis = "grey50",
-     tck = -0.01)
+       col = "#FADA5E")
+# x axis
+axis(1, labels = F,
+     col = "grey40",
+     col.axis = "grey40",
+     tck = F)
+
+text(x = seq(1750, 2000, 10),
+     y = par("usr")[3] - 1,
+     labels = meteorites_total3$decade,
+     xpd = NA, srt = 35,
+     adj = 1, cex = 0.8,
+     col = "grey40")
+
+# y axis
 axis(2, seq(0, 90, 10),
      las = 2,
-     col = "grey50",
-     col.axis = "grey50",
+     col = "grey40",
+     col.axis = "grey40",
      cex.axis = 0.8,
      tck = -0.01)
-
-colours()
 
 ```
 
