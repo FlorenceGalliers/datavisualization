@@ -97,11 +97,19 @@ meteorites_total3 <- meteorites3 %>%
 ```{r}
 # Downloaded title font from (https://www.dafont.com/galaxy-1.font?text=The+Rise+and+Fall+of+Meteorites)
 
-subtitle <- "Fallen meteorites are those that were spotted falling and later tracked, the number\nof these found worldwide per decade is shown here"
+# make objects containing text
+subtitle <- "Fallen meteorites are those that were spotted falling and later located"
+
+section1 <- "The idea of\nmeteorites was\nlargely rejected\nbefore the 1790s"
+
+section2 <- "Scientific knowlegde of meteorites increased\nduring the 19th century, as well as the world\npopulation and education levels."
+
+section3 <- "The number of meteorites has\nrecently stablised, there may\nalso be a time lag between a\nmeteorite falling and its\nappearance in records."
 
 
 # plot
 par(bg = "white", xpd = NA)
+
 
 plot(x = meteorites_total3$decade,
      y = meteorites_total3$Count,
@@ -116,47 +124,118 @@ plot(x = meteorites_total3$decade,
      col.lab = "grey50")
 
 # add title
-title("The Rise and Fall of Meteorites",
+title("The Rise of Fallen Meteorites",
       family = "Galaxy 1", 
       cex.main = 3,
       col.main = "grey20")
 
 # add y axis title
-title(ylab = "Number of meteorites",
-      line = 2, 
+title(ylab = "No. of observed falls (av. over 10 year period)",
+      line = 1.2, 
       col.lab = "grey50",
-      cex.lab = 0.8)
+      cex.lab = 0.8,
+      family = "Courier")
+
+title(xlab = "Year",
+      line = 1.2, 
+      col.lab = "grey50",
+      cex.lab = 0.8,
+      family = "Courier")
 
 # add subtitle
-text(1827,90, subtitle,
-     col = "grey30")
+text(1915, 92, subtitle,
+     col = "grey30",
+     family = "Courier")
+
+# x axis
+axis(1, seq(1750, 2000, 10),
+     labels = F,
+     col = "grey50",
+     col.axis = "grey50",
+     tck = -0.005)
+
+text(x = seq(1750, 2000, 10),
+     y = par("usr")[3] - 2,
+     labels = meteorites_total3$decade,
+     xpd = NA, srt = 35,
+     adj = 0.9, cex = 0.8,
+     col = "grey50",
+     family = "Courier")
+
+# y axis
+axis(2, seq(0, 90, 10),
+     las = 2,
+     col = "grey50",
+     col.axis = "grey50",
+     cex.axis = 0.8,
+     tck = -0.01,
+     line = -0.8,
+     family = "Courier")
+
+# add rectangle for first section
+rect(1750, 0, 1785, 90,
+     col = alpha("#99D6EA", 0.5),
+     border = "white")
+# add text to first section
+text(1767, 15, section1,
+     col = "grey30",
+     cex = 0.8,
+     family = "Courier")
+
+# add rect for second section
+rect(1786, 0, 1930, 90,
+     col = alpha("#FDD85D", 0.5),
+     border = "white")
+# add text to second section
+text(1840, 70, section2,
+     col = "grey30",
+     cex = 0.9,
+     family = "Courier")
+
+# add rect for third section
+rect(1931, 0, 2000, 90,
+     col = alpha("#6798C0", 0.5),
+     border = "white")
+# add text to third section
+text(1970, 80, section3,
+     col = "grey30",
+     cex = 0.8,
+     family = "Courier")
+
+# add lines for important events
+segments(1794, 0, 1794, 12,
+      col = "coral",
+      lwd = 2)
+segments(1833, 0, 1833, 23,
+      col = "coral",
+      lwd = 2)
+
+# add text for important events
+text(1812, 5, "1794: Ernst Chladni,\n'father of meteoritics'\nhypothesised that\nmeteorites are rocks\nfrom space",
+     col = "coral",
+     family = "Courier",
+     cex = 0.6)
+
+text(1855, 10,
+     "1833: Leonid Shower,\nsparked modern day\nawareness of meteorites\nand after this point\nscientific studies began",
+     col = "coral",
+     family = "Courier",
+     cex = 0.6)
+
+lines(x = meteorites_total3$decade,
+     y = meteorites_total3$Count,
+     type = "l",
+     col = "grey30",
+     lwd = 4,
+     col.lab = "grey50")
 
 # add points
 points(x = meteorites_total3$decade,
        y = meteorites_total3$Count,
        pch = 8, 
        cex = 1.5,
-       col = "#FADA5E")
-# x axis
-axis(1, labels = F,
-     col = "grey40",
-     col.axis = "grey40",
-     tck = F)
+       col = "#6798C0")
 
-text(x = seq(1750, 2000, 10),
-     y = par("usr")[3] - 1,
-     labels = meteorites_total3$decade,
-     xpd = NA, srt = 35,
-     adj = 1, cex = 0.8,
-     col = "grey40")
-
-# y axis
-axis(2, seq(0, 90, 10),
-     las = 2,
-     col = "grey40",
-     col.axis = "grey40",
-     cex.axis = 0.8,
-     tck = -0.01)
 
 ```
 
