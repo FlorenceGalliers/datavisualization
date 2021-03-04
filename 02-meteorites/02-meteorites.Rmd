@@ -187,7 +187,7 @@ rect(1786, 0, 1930, 90,
      col = alpha("#FDD85D", 0.5),
      border = "white")
 # add text to second section
-text(1840, 70, section2,
+text(1850, 80, section2,
      col = "grey30",
      cex = 0.9,
      family = "Courier")
@@ -288,19 +288,19 @@ top20c <- cbind(top20, country_code)
 top20c$class <- factor(top20c$class)
 levels(top20c$class)
 levels(top20c$class) <- c("Stony Chondrites",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
-                          "Metallic (Iron)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
+                          "Iron (Metallic)",
                           "Stony-Iron",
                           "Stony-Iron")
-top20c$class <- factor(top20c$class, levels = c("Metallic (Iron)", "Stony-Iron", "Stony Chondrites")) 
+top20c$class <- factor(top20c$class, levels = c("Iron (Metallic)", "Stony-Iron", "Stony Chondrites")) 
 
 # create new column combining name of meteorite and year it fell
 top20c$title <- paste(top20c[ , 1],",", top20c[ , 7])
@@ -334,7 +334,7 @@ ggplot(top20c,
   scale_color_manual(values = c("#8B8682", "coral", "#ffcc00")) +
   scale_fill_manual(values = c("#8B8682",  "coral", "#ffcc00")) +
   coord_flip(clip = "off") +
-  labs(title = "Name, Year found ---------------- Country",
+  labs(title = "",
        y = "Mass (tonnes)",
        x = "") +
   theme_minimal() +
@@ -365,17 +365,26 @@ ggplot(top20c,
   annotate("text",
            x = 12, 
            y = 48, 
-           label = "IRON METEORITES ARE THE\n LARGEST TO BE FOUND",
+           label = "THE LARGEST METEORITES FOUND\nON EARTH ARE MADE OF IRON",
            color = "#615d5b",
            family = "Avenir",
            size = 7) +
   annotate("text",
            x = 10, 
            y = 48,
-           label = "18 out of 20 of the largest meteorites\nto found on Earth were made of Iron",
+           label = "18 out of 20 of the largest meteorites\nthat have been found were made of Iron",
            colour = "#8B8682",
            family = "Avenir",
-           size = 4) 
+           size = 4) +
+  annotate("text",
+           x = 21, 
+           y = 0,
+           label = "Name of Meteorite, Year",
+           colour = "#8B8682",
+           family = "Avenir",
+           size = 3)
+
+
 ```
 
 Interactive plot: where are the meteorites in the world?
