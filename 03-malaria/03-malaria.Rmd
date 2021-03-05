@@ -42,7 +42,7 @@ head(malaria_deaths_age)
 unique(malaria_deaths_age$code) # 197
 unique(malaria_deaths_age$entity) #228
 unique(malaria_deaths_age$age_group)
-# this should be a factor?
+# this should be a factor? and ordered
 malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group, 
                                        levels = c("Under 5",
                                                   "5-14",
@@ -74,88 +74,101 @@ lines(x = niger_deaths$Year,
       y = niger_deaths$deaths,
       type = "l")
 
-# the world malaria deaths are the average, not the total.
+# the world malaria deaths are the average, not the total. hmm
+```
 
-# Look at incidence. 2000, 2005, 2010, 2015
+```{r}
+# Lets go and look at incidence. 2000, 2005, 2010, 2015
 # Parallel plot of African countries over time
-
 head(malaria_inc)
 # contains incidence data as a rate, per 1,000 of population at risk.
 
 # Extract just countries in continent of Africa from this?
+# create new column that contains the continent using country code package
 malaria_inc$continent <- countrycode(malaria_inc$Entity, 
             "country.name",
             "continent")
-
+# then subset to just africa
 africa_inc <- malaria_inc %>%
   subset(continent == "Africa")
 
+# check it has worked
 head(africa_inc)
+# rename ridiculously long column name for incidence
 africa_inc <- africa_inc %>%
   rename(incidence = 'Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)')
+
+# subset three countries that have the highest incidence rate in 2015
+africa_inc_high <- africa_inc %>%
+  subset(Year == 2015) %>%
+  arrange(desc(incidence)) %>%
+  slice(1:3)
 
 africa_inc_high <- africa_inc %>%
   filter(Entity == "Mali" | Entity == "Burkina Faso" | Entity == "Nigeria")
 
+# subset the three countries with the largest difference between 2015 and 2000 incidence rates, e.g. those that have decreased their malaria incidence the most
+africa_inc_2000 <- africa_inc %>%
+  subset(Year == 2000)
+
+africa_inc_2015 <- africa_inc %>%
+  subset(Year == 2015)
+
+africa_inc_diff <- africa_inc_2000 %>%
+  select(Entity) %>%
+  mutate(diff = (africa_inc_2000$incidence - africa_inc_2015$incidence)) %>%
+  arrange(desc(diff)) %>%
+  slice(1:3)
+
+# cant workout how to filter directly using the above... just use character strings here but not ideal incase dataset was ever updated...
 africa_inc_low <- africa_inc %>%
   filter(Entity == "Ethiopia" | Entity == "Guinea-Bissau" | Entity == "Sao Tome and Principe")
 
-
+# make a plot of incidence over time
 ggplot(africa_inc, aes(x = Year, 
                        y = incidence,
-                       group = Entity)) +
-  geom_line(color = "grey90") +
-  geom_line(data = africa_inc_high, color = "#C12910",
-            size = 1) +
-  geom_line(data = africa_inc_low, color = "#2A9D8F",
-            size = 1) +
-  coord_trans(clip = "off") +
-  theme_minimal() +
+                       group = Entity)) + # group by country
+  geom_line(color = "grey90") + # make all lines light grey
+  geom_line(data = africa_inc_high, color = "#C12910", size = 1) + # red for high incidence
+  geom_line(data = africa_inc_low, color = "#2A9D8F", size = 1) + # green for low incidence
+  coord_trans(clip = "off") + # so labels dont get cut off
+  theme_minimal() + 
+  # add text for high incidence country labels
   geom_text(data = subset(africa_inc_high, Year == 2010), 
             aes(label = Entity, y = incidence + 15),
             color = "#C12910",
-            hjust = 0.5,
-            x = 2010,
+            hjust = 0.5, x = 2010,
             family = "Futura Medium") +
+  # add text for low incidence country labels
   geom_text(data = subset(africa_inc_low, Year == 2015), 
             aes(label = Entity, y = incidence-10),
-            color = "#2A9D8F", 
-            x = 2015,
+            color = "#2A9D8F", x = 2015,
             family = "Futura Medium") +
   labs(title = "There is a still vast disparity in Malaria incidence rates throughout Africa",
        y = "Incidence Rate (per 1,000 people)") +
   theme(
-    panel.grid = element_blank(),
-    plot.title = element_text(
-      family = "Futura Medium",
-      size = 16
-    ),
-    axis.title = element_text(
-      family = "Futura Medium",
-      size = 9,
-      hjust = 0.5
-    ),
-    axis.text = element_text(
-      family = "Futura Medium",
-      size = 10),
-    
-    ) 
+    panel.grid = element_blank(), # remove gridlines
+    plot.title = element_text( family = "Futura Medium", size = 16),
+    axis.title = element_text(family = "Futura Medium", size = 9, hjust = 0.5),
+    axis.text = element_text(family = "Futura Medium", size = 10)) 
 
-
+# Add another element? 
 # subset death data for africa
-
+# create new column for continent as before on the incidence data above
 malaria_deaths$continent <- countrycode(malaria_deaths$Entity, 
             "country.name",
             "continent")
-
+# subset for africa, and for 2015
 africa_deaths <- malaria_deaths %>%
   subset(continent == "Africa") %>%
   filter(Year == 2015)
-
+# check data
 head(africa_deaths)
+# rename long column name to deaths
 africa_deaths <- africa_deaths %>%
   rename(deaths = `Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`)
 
+# merge incidence data with death data
 africa_total <- merge(africa_inc, africa_deaths,
                       by.x = "Entity",
                       by.y = "Entity",
@@ -163,12 +176,15 @@ africa_total <- merge(africa_inc, africa_deaths,
   dplyr::select(Entity, Year.x, incidence, deaths) %>%
   rename("year" = "Year.x")
 
+# make totals of the highest incidence rates
 africa_total_high <- africa_total %>%
   filter(Entity == "Mali" | Entity == "Burkina Faso" | Entity == "Nigeria")
 
+# and largest decrease in incidence rate
 africa_total_low <- africa_total %>%
   filter(Entity == "Ethiopia" | Entity == "Guinea-Bissau" | Entity == "Sao Tome and Principe")
 
+# rename Sao Tome and Principe so it will appear on two lines in the label
 africa_total_low$Entity <- gsub("Sao Tome and Principe", "Sao Tome\nand Principe", africa_total_low$Entity)
 
 
@@ -179,31 +195,31 @@ africa_total_low
 ggplot(africa_total, aes(x = year, 
                        y = incidence,
                        group = Entity, 
-                       size = deaths)) +
-  geom_line(color = "grey90",
-            alpha = 0.6) +
+                       size = deaths)) + # size lines by 2015 deaths
+  geom_line(color = "grey90", alpha = 0.6) + # background lines slightly transparent
+  # add lines for high incidence countries, varying the colors 
   geom_line(data = africa_total_high, color = c("#C12910","#C12910","#C12910","#C12910",
                                                 "#980000", "#980000", "#980000", "#980000",
                                                 "#FB5E3C", "#FB5E3C", "#FB5E3C", "#FB5E3C"),
-            aes(size = deaths), alpha = 0.6,
-            show.legend = F) +
+            aes(size = deaths), alpha = 0.6, # slight transparency
+            show.legend = F) + # remove legend
+  # add lines for largest decrease in incidence countries
   geom_line(data = africa_total_low, color = c("#2A9D8F", "#2A9D8F", "#2A9D8F", "#2A9D8F",
                                                "#007362", "#007362", "#007362", "#007362",
                                                "#64CFBF", "#64CFBF", "#64CFBF", "#64CFBF"),
             aes(size = deaths), alpha = 0.6,
             show.legend = F) +
-  coord_trans(clip = "off") +
+  coord_trans(clip = "off") + # remove clipping so labels don't get cut off
   theme_minimal() +
   geom_label_repel(data = subset(africa_total_high, year == 2015), 
             aes(label = Entity, y = incidence),
-            seed = 42,
-            color = c("#C12910", "#980000", "#FB5E3C"),
-            hjust = "left",
-            x = 2015.1,
-            family = "Futura Medium",
-            size = 4,
+            seed = 42, # set seed as geom_label_repel is random each time
+            color = c("#C12910", "#980000", "#FB5E3C"), # same colours as lines
+            hjust = "left", # left justification
+            x = 2015.1, # slightly move over from end of lines
+            family = "Futura Medium", size = 4,
             nudge_x = 0.2,
-            min.segment.length = Inf,
+            min.segment.length = Inf, # remove any spider lines
             xlim = c(2015.2, NA)) +
   geom_label_repel(data = subset(africa_total_low, year == 2015), 
             aes(label = Entity, y = incidence),
@@ -211,44 +227,28 @@ ggplot(africa_total, aes(x = year,
             color = c("#2A9D8F", "#007362", "#64CFBF"), 
             hjust = "left",
             x = 2015.1,
-            family = "Futura Medium",
-            size = 4,
+            family = "Futura Medium", size = 4,
             min.segment.length = Inf,
             xlim = c(2015.2, NA)) +
   labs(title = "There is a still vast disparity in Malaria incidence and death rates throughout Africa",
        subtitle = "Despite some countries drastically reducing the prevalence of malaria, other countries still have a yearly incidence\nrate of over 400 per 1,000 people at risk",
        y = "Incidence Rate (per 1,000 people)",
        x = "Year",
+       # change title of legend
        size = "Each line represents one country in\nAfrica, with its width representing the\ndeath rate per 100,000 people in 2015") +
   theme(
-    panel.grid = element_blank(),
-    plot.title = element_text(
-      family = "Futura Medium",
-      size = 16),
-    plot.subtitle = element_text(
-      family = "Futura Medium",
-      size = 12,
-      color = "grey40"
-    ),
-    axis.title = element_text(
-      family = "Futura Medium",
-      size = 9,
-      hjust = 0.5),
-    axis.text = element_text(
-      family = "Futura Medium",
-      size = 10),
+    panel.grid = element_blank(), # remove gridlines
+    # titles and subtitles
+    plot.title = element_text(family = "Futura Medium", size = 16),
+    plot.subtitle = element_text(family = "Futura Medium", size = 12, color = "grey40"),
+    axis.title = element_text(family = "Futura Medium", size = 9, hjust = 0.5),
+    axis.text = element_text(family = "Futura Medium", size = 10),
+    # legend
     legend.position = c(0.92, 0.87),
-    legend.title = element_text(
-      family = "Futura Medium",
-      size = 10,
-      color = "grey40"
-    ),
-    legend.text = element_text(
-      family = "Futura Medium",
-      size = 10,
-      color = "grey40"
-    ),
+    legend.title = element_text(family = "Futura Medium", size = 10, color = "grey40"),
+    legend.text = element_text(family = "Futura Medium", size = 10, color = "grey40"),
     legend.key.width = unit(2, "cm"),
+    # margins
     plot.margin = unit(c(1,2,1,1), "cm")
     ) 
 
@@ -263,7 +263,8 @@ head(malaria_deaths_age)
 
 mali_deaths <- malaria_deaths_age %>%
   subset(code == "MLI") %>%
-  dplyr::select(year, age_group, deaths)
+  dplyr::select(year, age_group, deaths) %>%
+  subset(year == 2016)
 
 barplot(mali_deaths$deaths)
 
@@ -276,11 +277,7 @@ mali_deaths$age_group <- factor(mali_deaths$age_group,
 
 mali <- table(mali_deaths)
 
-barplot(mali_deaths$deaths)
 
-pivot_wider(mali_deaths, 
-            names_from = age_group,
-            values_from = deaths)
 
 ```
 
