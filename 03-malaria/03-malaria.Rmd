@@ -18,6 +18,8 @@ library(GGally)
 library(doBy)
 library(ggrepel)
 
+setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Analytics/Assignment/datavisualization/03-malaria")
+
 ```
 
 Malaria. 1990 to 2016.
@@ -288,8 +290,148 @@ rownames(world_death_summary_wide) <- c("Under 5", "5-14", "15-49", "50-69", "70
 
 # make a barplot
 barplot(world_death_summary_wide,
-        col = c(), 
+        col = c("darkred", "blue", "green", "orange", "yellow"), 
         space = 0.2)
+
+# -----------------------------------------
+
+# make barplot for Low SDI
+low_sdi_deaths <- malaria_deaths_age %>%
+  filter(entity == "Low SDI")
+
+# make summaries of age group for each year
+low_sdi_summary <- low_sdi_deaths %>%
+  group_by(age_group, year) %>%
+  summarise(total = sum(deaths))
+
+# change into wide format in order to make barplot in base R... not tidy data ahh!
+low_sdi_summary_wide <- low_sdi_summary %>%
+  pivot_wider(names_from = year,
+              values_from = total)
+
+# transform into matrix
+low_sdi_summary_wide <- as.matrix(low_sdi_summary_wide)
+# remove first column as it is still the factors
+low_sdi_summary_wide <- low_sdi_summary_wide[ ,-1]
+# change row names to factor names
+rownames(low_sdi_summary_wide) <- c("Under 5", "5-14", "15-49", "50-69", "70+")
+
+# make a barplot
+barplot(low_sdi_summary_wide,
+        col = c("darkred", "blue", "green", "orange", "yellow"), 
+        space = 0.2)
+
+# ---------------------------------------
+
+
+# make barplot for high SDI
+high_sdi_deaths <- malaria_deaths_age %>%
+  filter(entity == "High SDI")
+
+# make summaries of age group for each year
+high_sdi_summary <- high_sdi_deaths %>%
+  group_by(age_group, year) %>%
+  summarise(total = sum(deaths))
+
+# change into wide format in order to make barplot in base R... not tidy data ahh!
+high_sdi_summary_wide <- high_sdi_summary %>%
+  pivot_wider(names_from = year,
+              values_from = total)
+
+# transform into matrix
+high_sdi_summary_wide <- as.matrix(high_sdi_summary_wide)
+# remove first column as it is still the factors
+high_sdi_summary_wide <- high_sdi_summary_wide[ ,-1]
+# change row names to factor names
+rownames(high_sdi_summary_wide) <- c("Under 5", "5-14", "15-49", "50-69", "70+")
+
+# make a barplot
+barplot(high_sdi_summary_wide,
+        col = c("darkred", "blue", "green", "orange", "yellow"), 
+        space = 0.2)
+
+# -----------------------------------------------
+
+
+# make barplot for middle SDI
+middle_sdi_deaths <- malaria_deaths_age %>%
+  filter(entity == "Middle SDI")
+
+# make summaries of age group for each year
+middle_sdi_summary <- middle_sdi_deaths %>%
+  group_by(age_group, year) %>%
+  summarise(total = sum(deaths))
+
+# change into wide format in order to make barplot in base R... not tidy data ahh!
+middle_sdi_summary_wide <- middle_sdi_summary %>%
+  pivot_wider(names_from = year,
+              values_from = total)
+
+# transform into matrix
+middle_sdi_summary_wide <- as.matrix(middle_sdi_summary_wide)
+# remove first column as it is still the factors
+middle_sdi_summary_wide <- middle_sdi_summary_wide[ ,-1]
+# change row names to factor names
+rownames(middle_sdi_summary_wide) <- c("Under 5", "5-14", "15-49", "50-69", "70+")
+
+# make a barplot
+barplot(middle_sdi_summary_wide,
+        col = c("darkred", "blue", "green", "orange", "yellow"), 
+        space = 0.2)
+
+
+# -----------------------------------
+
+# make a comparison barplot between low, middle and high SDI countries.
+palette <- c("#fc8d62", "#66c2a5", "#8da0cb", "#e78ac3", "#a6d854")
+
+ggsave("malaria01.jpeg", 
+       width = 20, 
+       height = 20, 
+       units = "cm")
+
+# place on left hand side
+par(fig = c(0.5, 1, 0.5, 1))
+# make a barplot for low sdi countries
+barplot(low_sdi_summary_wide,
+        col = palette, 
+        space = 0.2,
+        ylim = c(0, 550000), 
+        yaxt = "none")
+axis(2, las = 2, at = c(0, 50000, 100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000, 550000),
+     labels = c("0", "50,000", "100,000",
+                "150,000", "200,000", "250,000",
+                "300,000", "350,000", "400,000",
+                "450,000", "500,000", "550,000"),
+     cex.axis = 0.8)
+
+# position at bottom left
+par(fig = c(0, 0.5, 0, 0.5), new = T)
+
+# make a barplot for middle sdi countries
+barplot(middle_sdi_summary_wide,
+        col = palette, 
+        space = 0.2,
+        ylim = c(0, 20000),
+        yaxt = "none")
+axis(2, las = 2, at = c(0, 5000, 10000, 15000, 20000),
+     labels = c("0", "5000", "10000", "15000", "20000"),
+     cex.axis = 0.8)
+
+# position bottom right
+par(fig = c(0.5, 1, 0, 0.5), new = T)
+# make a barplot for high sdi countries
+barplot(high_sdi_summary_wide,
+        col = palette, 
+        space = 0.2,
+        ylim = c(0, 15),
+        yaxt = "none")
+axis(2, las = 2, at = c(0, 5, 10, 15),
+     labels = c("0", "5", "10", "15"),
+     cex.axis = 0.8)
+
+dev.off()
+
 
 ```
 
