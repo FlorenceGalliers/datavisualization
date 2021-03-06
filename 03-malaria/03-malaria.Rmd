@@ -261,23 +261,35 @@ We have seen that the malaria incidence in Mali is the highest out of all Africa
 ```{r}
 head(malaria_deaths_age)
 
-mali_deaths <- malaria_deaths_age %>%
-  subset(code == "MLI") %>%
-  dplyr::select(year, age_group, deaths) %>%
-  subset(year == 2016)
+# summarise all worldwide deaths by year and by age group
 
-barplot(mali_deaths$deaths)
+# first check entries are only those that are countries, and not internal summaries:
+unique(malaria_deaths_age$entity)
+# there is already an Entity called 'World'
+world_deaths_age <- malaria_deaths_age %>%
+  filter(entity == "World")
 
-mali_deaths$age_group <- factor(mali_deaths$age_group, 
-                                       levels = c("Under 5",
-                                                  "5-14",
-                                                  "15-49",
-                                                  "50-69",
-                                                  "70 or older"))
+# make summaries of age group for each year
+world_death_summary <- world_deaths_age %>%
+  group_by(age_group, year) %>%
+  summarise(total = sum(deaths))
 
-mali <- table(mali_deaths)
+# change into wide format in order to make barplot in base R... not tidy data ahh!
+world_death_summary_wide <- world_death_summary %>%
+  pivot_wider(names_from = year,
+              values_from = total)
 
+# transform into matrix
+world_death_summary_wide <- as.matrix(world_death_summary_wide)
+# remove first column as it is still the factors
+world_death_summary_wide <- world_death_summary_wide[ ,-1]
+# change row names to factor names
+rownames(world_death_summary_wide) <- c("Under 5", "5-14", "15-49", "50-69", "70+")
 
+# make a barplot
+barplot(world_death_summary_wide,
+        col = c(), 
+        space = 0.2)
 
 ```
 
