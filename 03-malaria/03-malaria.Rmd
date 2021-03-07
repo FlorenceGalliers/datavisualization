@@ -263,6 +263,13 @@ We have seen that the malaria incidence in Mali is the highest out of all Africa
 ```{r}
 head(malaria_deaths_age)
 
+malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group, 
+                                       levels = c("Under 5",
+                                                  "5-14",
+                                                  "15-49",
+                                                  "50-69",
+                                                  "70 or older"))
+
 # summarise all worldwide deaths by year and by age group
 
 # first check entries are only those that are countries, and not internal summaries:
@@ -385,25 +392,50 @@ barplot(middle_sdi_summary_wide,
 # make a comparison barplot between low, middle and high SDI countries.
 palette <- c("#fc8d62", "#66c2a5", "#8da0cb", "#e78ac3", "#a6d854")
 
-ggsave("malaria01.jpeg", 
-       width = 20, 
-       height = 20, 
-       units = "cm")
+age_groups <- c("Under 5", "5-14", "15-49", "50-69", "70 or older")
+
+years <- seq(1990, 2016, 1)
+
+# write plot into png file, 20cm x 20cm, resolution 300 dpi.
+png(filename = "malaria01.png",
+    width = 28, height = 20, units = "cm", res = 300)
 
 # place on left hand side
 par(fig = c(0.5, 1, 0.5, 1))
 # make a barplot for low sdi countries
 barplot(low_sdi_summary_wide,
         col = palette, 
-        space = 0.2,
         ylim = c(0, 550000), 
-        yaxt = "none")
-axis(2, las = 2, at = c(0, 50000, 100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000, 550000),
+        space = 0.3,
+        yaxt = "none",
+        las = 2, cex.names = 0.6, line = -0.8,
+        family = "Avenir",
+        border = palette)
+
+title(ylab = "Number of Deaths from Malaria per Year",
+      family = "Avenir",
+      cex.lab = 0.8, 
+      line = 3)
+
+axis(2, las = 2, 
+     at = c(0, 50000, 100000, 150000, 
+            200000, 250000, 300000, 
+            350000, 400000, 450000, 
+            500000, 550000),
      labels = c("0", "50,000", "100,000",
                 "150,000", "200,000", "250,000",
                 "300,000", "350,000", "400,000",
                 "450,000", "500,000", "550,000"),
-     cex.axis = 0.8)
+     cex.axis = 0.5,
+     cex = 0.5,
+     family = "Avenir",
+     tck = -0.01, gap.axis = 0.5,
+     lwd = 0.5)
+
+title("Low SDI",
+      family = "Avenir", 
+      cex.main = 1.2)
+
 
 # position at bottom left
 par(fig = c(0, 0.5, 0, 0.5), new = T)
@@ -413,10 +445,27 @@ barplot(middle_sdi_summary_wide,
         col = palette, 
         space = 0.2,
         ylim = c(0, 20000),
-        yaxt = "none")
+        yaxt = "none",
+        las = 2, cex.names = 0.6,
+        line = -0.8,
+        family = "Avenir",
+        border = palette)
+
+title(ylab = "Number of Deaths from Malaria per Year",
+      family = "Avenir",
+      cex.lab = 0.8, 
+      line = 3)
+
 axis(2, las = 2, at = c(0, 5000, 10000, 15000, 20000),
      labels = c("0", "5000", "10000", "15000", "20000"),
-     cex.axis = 0.8)
+     cex.axis = 0.5, lwd = 0.5, 
+     cex = 0.5, tck = -0.01,
+     family = "Avenir")
+
+title("Middle SDI",
+      family = "Avenir", 
+      cex.main = 1.2,
+      col.main = "grey20")
 
 # position bottom right
 par(fig = c(0.5, 1, 0, 0.5), new = T)
@@ -425,12 +474,84 @@ barplot(high_sdi_summary_wide,
         col = palette, 
         space = 0.2,
         ylim = c(0, 15),
-        yaxt = "none")
+        yaxt = "none",
+        las = 2, cex.names = 0.6,
+        line = -0.8,
+        family = "Avenir",
+        border = palette)
+
+title(ylab = "Number of Deaths from Malaria per Year",
+      family = "Avenir",
+      cex.lab = 0.8, 
+      line = 3)
+
 axis(2, las = 2, at = c(0, 5, 10, 15),
      labels = c("0", "5", "10", "15"),
-     cex.axis = 0.8)
+     cex.axis = 0.5, lwd = 0.5,
+     cex = 0.5, tck = -0.01,
+     family = "Avenir")
 
+
+title("High SDI",
+      family = "Avenir", 
+      cex.main = 1.2,
+      col.main = "grey20")
+
+
+# add titles and text to top left of plot
+par(fig = c(0, 0.5, 0.5, 1))
+
+# add legend
+#legend("bottom", title = "Age Group",
+#       legend = c("Under 5", "5-14", "15-49", "50-69", "70 or older"),
+#       fill = palette, border = palette,
+#       cex = 0.3, horiz = T, pt.cex = 1,
+#       bty = "n")
+
+# add rectangles and text for legend instead
+rect(4, 3, 8, 4, 
+     col = palette[1])
+rect(9, 3, 13, 4, 
+     col = palette[2])
+rect(14, 3, 18, 4, 
+     col = palette[3])
+rect(19, 3, 23, 4, 
+     col = palette[4])
+rect(24, 3, 28, 4, 
+     col = palette[5])
+
+text(6, 3.5, label = age_groups[1],
+     family = "Avenir", cex = 0.5)
+text(11, 3.5, label = age_groups[2],
+     family = "Avenir", cex = 0.5)
+text(16, 3.5, label = age_groups[3],
+     family = "Avenir", cex = 0.5)
+text(21, 3.5, label = age_groups[4],
+     family = "Avenir", cex = 0.5)
+text(26, 3.5, label = age_groups[5],
+     family = "Avenir", cex = 0.5)
+
+
+
+text(x = 16, y = 13, 
+     "Childhood deaths from malaria are 300,000x\nhigher in countries that are less developed",
+     family = "Avenir",
+     cex = 1.12)
+
+text(x = 16, y = 8, 
+     "Depending on a countries socio-demographic index (SDI)\nthere is a huge difference between the number of deaths,\nthe distribution of these deaths between age groups and the\nrate of decrease over time. The SDI is a scale that identifies\na countries position on the spectrum of development.",
+     family = "Avenir",
+     cex = 0.7)
+
+text(x = 16, y = 1,
+     "Please note the extreme differences in scales of the\nnumber of deaths per year for the three graphs",
+     family = "Avenir",
+     cex = 0.7)
+
+
+# end plot
 dev.off()
+
 
 
 ```
