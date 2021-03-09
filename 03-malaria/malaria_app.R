@@ -7,12 +7,18 @@
 library(shiny)
 library(leaflet)
 library(shinythemes)
+library(countrycode)
+library(maps)
+library(sf)
+library(rnaturalearth)
 
 # Get Data ####
 tuesdata <- tidytuesdayR::tt_load('2018-11-13')
 malaria_deaths_age <- tuesdata$malaria_deaths_age
 malaria_deaths <- tuesdata$malaria_deaths
 malaria_inc <- tuesdata$malaria_inc
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
 
 malaria_deaths$deaths <- malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
 
@@ -46,8 +52,8 @@ ui <- fluidPage(theme = shinytheme("united"),
   fluidRow(
     column(12, 
            leafletOutput(outputId = "map",
-                         width = "500px",
-                         height = "500px"))
+                         width = "600px",
+                         height = "600px"))
   )
 )
 
@@ -84,7 +90,11 @@ server <- function(input, output) {
                                  padding = "3px 8px"),
                     textsize = "15px",
                     direction = "auto"
-                  )) 
+                  )) %>%
+      addLegend("bottomleft", pal = palette,
+                values = malaria_year$deaths,
+                title = "Mortality Rate (per 100,000 people)",
+                opacity = 1)
     })
 }
 

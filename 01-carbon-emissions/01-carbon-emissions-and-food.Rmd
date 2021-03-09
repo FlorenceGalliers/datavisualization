@@ -14,6 +14,8 @@ library(extrafont)
 library(countrycode)
 library(plyr)
 library(dplyr)
+
+setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Analytics/Assignment/datavisualization/01-carbon-emissions")
 ```
 
 ## Introduction
@@ -138,10 +140,10 @@ boxplot(consumption ~ food_category,
         boxwex = 1.2) # remove frame box around plot
 
 # add title to plot, and x and y axis labels
-title("Dairy, wheat and rice products are the\nmost widely eaten food types worldwide",
+title("Dairy and wheat products are the most widely eaten food types worldwide",
       family = "Avenir",
-      line = -3,
-      adj = 0.8)
+      line = 0,
+      adj = 0.5)
       
 title(ylab = "Consumption (kg/person/year)",
       xlab = "Food Category",
@@ -201,6 +203,16 @@ legend( x = 12, y = 200,
   col = alpha(palette, 0.5),
   pch = 16, 
   cex = 1, bty = "n")
+
+# add text annotations using expression and phantom strings for multicoloured
+text(x = 5, y = 300,
+     expression("Europe "*phantom("leads the way on dairy consumption")),
+     col = palette[4],
+     size = 2)
+text(x = 5, y = 300,
+     expression(phantom("Europe ")*"leads the way on dairy consumption"),
+     col = "black",
+     size = 2)
 
 
 
@@ -301,7 +313,7 @@ israel <- meat %>%
 colpal <- c("#ff6361", "#58508d", "#ffa600", "#003f5c", "#bc5090")
 
 # Plot a strip chart
-plot1 <- ggplot(meat_edit, 
+consumption02 <- ggplot(meat_edit, 
        aes(x = reorder(food_category, co2_emmission), 
            y = co2_emmission, 
            size = consumption)) +
@@ -335,12 +347,13 @@ plot1 <- ggplot(meat_edit,
         legend.title = element_text(family = "Avenir",
                                     size = 8),
         legend.background = element_blank(),
-        legend.direction = "horizontal") +
+        legend.direction = "horizontal",
+        plot.margin = unit(c(1,1,1,1), "cm")) +
   guides(size = guide_legend(reverse=TRUE,
                              title.position = "top", 
                              title.hjust = 0.5,
                              label.position = "bottom",
-                             override.aes=list(colour="grey70"))) +
+                             override.aes=list(colour = alpha("grey50", 0.5)))) +
   geom_point(data = argentina, position = position_jitter(seed = 41), 
              colour = colpal[1]) +
   geom_point(data = iceland, position = position_jitter(seed = 41), 
@@ -382,7 +395,10 @@ plot1 <- ggplot(meat_edit,
            size = 4, 
            family = "Avenir")
 
-plot1
+consumption02
+
+ggsave(filename = "consumption02.png", plot = consumption02,
+       width = 24, height = 20, units = "cm")
 
 ```
 
@@ -421,7 +437,7 @@ belarus_label <- europe_labels %>%
 
 set.seed(41)
 
-ggplot(data = europe_dairy) +
+consumption03 <- ggplot(data = europe_dairy) +
   geom_sf(aes(fill = consumption), color = "grey30") +
   labs(title = "") +
   scale_fill_viridis(option = "D", na.value = "grey80",
@@ -433,8 +449,7 @@ ggplot(data = europe_dairy) +
            clip = "off") +
   theme_void() +
   ggrepel::geom_label_repel(data = europe_labels, 
-                            aes(label = country, geometry = geometry#, fill = consumption
-                                ),
+                            aes(label = country, geometry = geometry),
                             stat = "sf_coordinates",
                 size = 3,
                 min.segment.length = 10,
@@ -460,7 +475,8 @@ ggplot(data = europe_dairy) +
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.text = element_text(family = "American Typewriter",
-                               size = 7)
+                               size = 7),
+    plot.margin = unit(c(1,1,1,1), "cm")
   ) +
   annotate("text",
            x = -18,
@@ -471,8 +487,10 @@ ggplot(data = europe_dairy) +
   guides(fill = guide_colorbar(barwidth = 1, 
                                barheight = 10))
 
-finland_label
+consumption03
 
+ggsave(filename = "consumption03.png", plot = consumption03,
+       width = 28, height = 24, unit = "cm")
 
 #mypalette <- colorNumeric( palette="magma",
 #                           domain=world_dairy$consumption, na.color="transparent")

@@ -1,0 +1,12 @@
+name: carbon-emissions
+title: carbon-emissions
+username:
+account: florencegalliers
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3760715
+bundleId: 4320844
+url: https://florencegalliers.shinyapps.io/carbon-emissions/
+when: 1615295512.23163
+asMultiple: FALSE
+asStatic: FALSE

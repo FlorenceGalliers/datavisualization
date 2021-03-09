@@ -5,14 +5,15 @@
 
 library(shiny)
 library(shinythemes)
+library(plyr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(plyr)
 library(waffle)
+library(rsconnect)
 
-food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
-food_consumption$food_category <- factor(food_consumption$food_category)
+tuesdata <- tidytuesdayR::tt_load('2020-02-18')
+food_consumption <- tuesdata$food_consumption
 levels(food_consumption$food_category)
 food_consumption$food_category <- revalue(food_consumption$food_category,
                                           c("Lamb & Goat" = "Lamb/Goat",
@@ -54,12 +55,12 @@ category_names <- c("Beef",
 footprint_total <- footprint %>%
   select(country, co2_emmission) %>%
   group_by(country) %>%
-  dplyr::summarise(total = sum(co2_emmission))
+  summarise(total = sum(co2_emmission))
 
 consumption_total <- consumption_all %>%
   select(country, consumption) %>%
   group_by(country) %>%
-  dplyr::summarise(total = sum(consumption))
+  summarise(total = sum(consumption))
 
 category_data <- c(rep(1, 11))
 
@@ -83,17 +84,17 @@ ui <- fluidPage(
   
   fluidRow(
     column(6,
-      selectInput(inputId = "country1",
+      selectizeInput(inputId = "country1",
                   label = "Choose country 1:",
                   # use countrys, sort into alphabetical order
-                  choices = sort(food_consumption$country),
-                  selected = sort(food_consumption$country)[1])),
+                  choices = NULL),
+      multiple = F),
     column(6, 
-    selectInput(inputId = "country2",
+    selectizeInput(inputId = "country2",
                 label = "Choose country 2:",
                 # use countrys, sort into alphabetical order
-                choices = sort(food_consumption$country),
-                selected = sort(food_consumption$country)[1]))
+                choices = NULL),
+    multiple = F)
     ),
     # main panel for displaying outputs
     fluidRow(
@@ -166,6 +167,18 @@ ui <- fluidPage(
 # Define the Server
 server <- function(input, output){
   # use renderplot to indicate that it is reactive and the output type is a plot
+  
+  updateSelectizeInput(session = getDefaultReactiveDomain(), "country1", 
+                       choices = sort(food_consumption$country),
+                       selected = sort(food_consumption$country)[1],
+                       server = T)
+  
+  updateSelectizeInput(session = getDefaultReactiveDomain(), "country2",
+                       choices = sort(food_consumption$country),
+                       selected = sort(food_consumption$country)[1],
+                       server = T)
+  
+  
  # Output for country 1
    output$text1 <- renderText({
     paste(input$country1)
@@ -256,10 +269,6 @@ server <- function(input, output){
     
 }
 
-# Run the App
-shinyApp(ui = ui,
-         server = server)
+shinyApp(ui, server)
 
 
-
-fa_list()
