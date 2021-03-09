@@ -11,8 +11,8 @@ library(tidyverse)
 library(ggplot2)
 library(extrafont)
 #font_import()
-library(plyr)
 library(countrycode)
+library(plyr)
 library(dplyr)
 ```
 
@@ -116,10 +116,11 @@ xlabels <- c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Beef", "Eggs", "Nuts"
 # make food category a factor and set the order as above.
 food_plot$food_category <- factor(food_plot$food_category, levels = c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Pork", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Soybeans"), ordered = T)
 
-set.seed(42) # so that the jitter function remains the same each time...
-
 boxplot(consumption ~ reorder(food_category, consumption),
         data = food_consumption)
+# -----------------------------------------------------------------
+
+set.seed(42) # so that the jitter function remains the same each time...
 
 # Create starting boxplot of food consumption
 boxplot(consumption ~ food_category, 
@@ -137,7 +138,7 @@ boxplot(consumption ~ food_category,
         boxwex = 1.2) # remove frame box around plot
 
 # add title to plot, and x and y axis labels
-title("       Dairy, wheat and rice products are the\nmost widely eaten foods worldwide",
+title("Dairy, wheat and rice products are the\nmost widely eaten food types worldwide",
       family = "Avenir",
       line = -3,
       adj = 0.8)
@@ -195,14 +196,11 @@ stripchart(consumption ~ food_category,
            method = "jitter", add = T, 
            at = c(1.4, 2.9, 4.4, 5.9, 7.4, 8.9, 10.4, 11.9, 13.4, 14.9, 16.4),
            pch = 16)
-legend(
-  x ="topright",
+legend( x = 12, y = 200,
   legend = paste(levels(food_plot$continent)),
   col = alpha(palette, 0.5),
   pch = 16, 
-  cex = 1)
-
-
+  cex = 1, bty = "n")
 
 
 
@@ -271,11 +269,17 @@ pork <- meat %>%
 pork[which.max(pork$co2_emmission), ]
 hongkong_value <- as.numeric(pork[which.max(pork$co2_emmission), 4])
 
+poultry <- meat %>%
+  filter(food_category == "Poultry")
+poultry[which.max(poultry$co2_emmission), ]
+israel_value <- as.numeric(poultry[which.max(poultry$co2_emmission), 4])
+
 # remove these values from the meat_edit dataset
 meat_edit <- meat[-(which(meat$co2_emmission == argentina_value | 
         meat$co2_emmission == iceland_value |
         meat$co2_emmission == maldives_value |
-        meat$co2_emmission == hongkong_value)), ]
+        meat$co2_emmission == hongkong_value |
+          meat$co2_emmission == israel_value)), ]
 
 # subset each value into its own data frame so it can be plotted separately.
 argentina <- meat %>%
@@ -289,6 +293,12 @@ maldives <- meat %>%
 # Hong Kong - Pork
 hongkong <- meat %>%
   filter(country == "Hong Kong SAR. China" & food_category == "Pork")
+# Israel - Poultry
+israel <- meat %>%
+  filter(country == "Israel" & food_category == "Poultry")
+
+# colour palette for 5 colours:
+colpal <- c("#ff6361", "#58508d", "#ffa600", "#003f5c", "#bc5090")
 
 # Plot a strip chart
 plot1 <- ggplot(meat_edit, 
@@ -296,30 +306,30 @@ plot1 <- ggplot(meat_edit,
            y = co2_emmission, 
            size = consumption)) +
   geom_point(position = position_jitter(seed = 41),
-             colour = "grey70") +
+             colour = alpha("grey50", 0.5)) +
   coord_flip() +
   labs(title = "Argentina emits the most CO2 from beef...",
-       subtitle = "...what about other animal products?",
+       subtitle = "...which countries have the highest emissions from other animal products?",
        size = "Each circle represents a country,\nsized by quantity (kg/person/year) of\neach meat supplied for consumption") +
   ylab("CO2 emissions (kg CO2/person/year)") +
   scale_x_discrete(labels = c("POULTRY", "FISH", "PORK", "LAMB/GOAT", "BEEF")) +
   theme(plot.title = element_text(family = "Avenir", 
                                   size = 16, 
-                                  colour = "#840a35"),
+                                  colour = colpal[1]),
         plot.subtitle = element_text(family = "Avenir",
                                      size = 12),
         axis.title.y = element_blank(),
         axis.title.x = element_text(family = "Avenir",
                                     size = 8),
-        plot.background = element_rect(fill = "#f1f1f1"),
-        panel.background = element_rect(fill = "#f1f1f1"),
+        plot.background = element_rect(fill = "white"),
+        panel.background = element_rect(fill = "white"),
         panel.grid = element_blank(),
         axis.ticks = element_blank(),
-        axis.text.y = element_text(angle = 90, hjust=0.5, vjust = -6,
-                                   face = "bold", size = 10, 
+        axis.text.y = element_text(angle = 0, hjust=1,
+                                   size = 10, 
                                    family = "Avenir"),
         axis.text.x = element_text(family = "Avenir"),
-        legend.position = c(0.85, 0.4),
+        legend.position = c(0.85, 0.2),
         legend.text = element_text(family = "Avenir",
                                    size = 8),
         legend.title = element_text(family = "Avenir",
@@ -332,36 +342,44 @@ plot1 <- ggplot(meat_edit,
                              label.position = "bottom",
                              override.aes=list(colour="grey70"))) +
   geom_point(data = argentina, position = position_jitter(seed = 41), 
-             colour = "#840a35") +
+             colour = colpal[1]) +
   geom_point(data = iceland, position = position_jitter(seed = 41), 
-             colour = "purple") +
+             colour = colpal[2]) +
   geom_point(data = hongkong, position = position_jitter(seed = 36), 
-             colour = "orange") +
+             colour = colpal[3]) +
   geom_point(data = maldives, position = position_jitter(seed = 41), 
-             colour = "royalblue") + 
+             colour = colpal[4]) + 
+  geom_point(data = israel, position = position_jitter(seed = 24), 
+             colour = colpal[5]) +
   # argentina text
-  annotate("text", x = 4.77, y = 1600,
-           label = "ARGENTINA",
-           colour = "#840a35",
+  annotate("text", x = 4.78, y = 1600,
+           label = "Argentina",
+           colour = colpal[1],
            size = 4,
            family = "Avenir") +
   # iceland text
   annotate("text", x = 3.77, y = 820,
-           label = "ICELAND",
-           colour = "purple",
+           label = "Iceland",
+           colour = colpal[2],
            size = 4,
            family = "Avenir") +
   # hong kong text
-  annotate("text", x = 3.1, y = 350,
-           label = "HONG KONG",
-           colour = "orange",
+  annotate("text", x = 3.1, y = 360,
+           label = "Hong Kong",
+           colour = colpal[3],
            size = 4,
            family = "Avenir") +  
   # maldives text
-  annotate("text", x = 1.77, y = 380,
-           label = "MALDIVES",
-           colour = "royalblue",
+  annotate("text", x = 1.77, y = 390,
+           label = "Maldives",
+           colour = colpal[4],
            size = 4,
+           family = "Avenir") +
+  # israel text
+  annotate("text", x = 0.85, y = 140,
+           label = "Israel",
+           colour = colpal[5], 
+           size = 4, 
            family = "Avenir")
 
 plot1

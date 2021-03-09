@@ -194,7 +194,7 @@ africa_total_low
 
 
 # plot and make line widths show the number of deaths
-ggplot(africa_total, aes(x = year, 
+malaria02 <- ggplot(africa_total, aes(x = year, 
                        y = incidence,
                        group = Entity, 
                        size = deaths)) + # size lines by 2015 deaths
@@ -251,8 +251,11 @@ ggplot(africa_total, aes(x = year,
     legend.text = element_text(family = "Futura Medium", size = 10, color = "grey40"),
     legend.key.width = unit(2, "cm"),
     # margins
-    plot.margin = unit(c(1,2,1,1), "cm")
+    plot.margin = unit(c(1, 3, 1, 1), "cm")
     ) 
+
+ggsave(filename = "malaria02.png", plot = malaria02, 
+       width = 28, height = 20, unit = "cm")
 
 ```
 
