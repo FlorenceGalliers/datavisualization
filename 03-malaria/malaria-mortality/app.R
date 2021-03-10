@@ -71,7 +71,7 @@ server <- function(input, output) {
             filter(Year == input$year)
         
         # create bins for color palette
-        bins <- c(0, 20, 40, 60, 80, 120, 150, Inf)
+        bins <- c(0, 25, 50, 100, 150, 200, 250)
         # create palette
         palette <- colorBin("YlOrRd", domain = africa$deaths, bins = bins)
         
