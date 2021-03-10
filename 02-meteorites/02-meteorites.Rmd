@@ -388,24 +388,10 @@ Interactive plot: where are the meteorites in the world?
 
 library(leaflet)
 library(forcats)
+library(leaflet.extras)
 
 meteorites$class <- factor(meteorites$class)
 unique(meteorites$class)
-
-meteorites_class <- fct_collapse(meteorites$class,
-             scc = stony_chondrites_carbonaceous,
-             sco = stony_chondrites_ordinary,
-             sce = stony_chondrites_enstatite,
-             sc = stony_chondrites,
-             spa = stony_primitive_achondrites,
-             sa = stony_achondrites,
-             sia = stony_iron_achondrites,
-             ia = iron_achondrites,
-             ou = other_unknown)
-
-meteorites$class <- as.factor(meteorites_class)
-
-levels(meteorites_class)
 
 stony_chondrites_carbonaceous <- c("CR2-an", "CI1", "CV3", "CM2", "OC", "C2-ung",
                                    "CO3.3", "CBa", "CR2", "CO3.2", "CK4", "CO3.5", 
@@ -509,10 +495,35 @@ iron_achondrites <- c("Iron, IVA", "Iron, IIAB", "Iron, IAB-sLL", "Iron, ungroup
 other_unknown <- c("Unknown")
 
 
+meteorites_class <- fct_collapse(meteorites$class,
+             scc = stony_chondrites_carbonaceous,
+             sco = stony_chondrites_ordinary,
+             sce = stony_chondrites_enstatite,
+             sc = stony_chondrites,
+             spa = stony_primitive_achondrites,
+             sa = stony_achondrites,
+             sia = stony_iron_achondrites,
+             ia = iron_achondrites,
+             ou = other_unknown)
+
+meteorites$class <- as.factor(meteorites_class)
+
+levels(meteorites_class)
+
+labels <- c("Stony Primitive Achondrites",
+            "Stony Achondrites",
+            "Stony Chondrites - Carbonaceous",
+            "Stony Chondrites",
+            "Stony Chondrites - Enstatite",
+            "Stony Chondrites - Ordinary",
+            "Iron Achondrites",
+            "Stony Iron Achondrites",
+            "Other / Unknown")
+
 # create bins for color palette
 bins <- c(0, 20, 40, 60, 80, 120, 150, Inf)
 # create palette
-palette <- colorFactor("YlOrRd", domain = meteorites$class)
+palette <- colorFactor("Paired", domain = meteorites$class)
     
 mytext <- paste(meteorites$name,
                     "<br/>",
@@ -541,16 +552,99 @@ leaflet(meteorites) %>%
     labelOptions = labelOptions(style = list("font-weight" = "normal",
                                              padding = "3px 8px"), 
                                 textsize = "13px", 
-                                direction = "auto"))
-  
+                                direction = "auto")) %>%
+  addLegend(position = "bottomright",
+            pal = palette,
+            values = ~class,
+            title = "Class of Meteorite",
+            opacity = 1,
+            labFormat = function(type, cuts, p) {  # Here's the trick
+                                                  paste0(labels)
+                             }
+                             ) 
 
-       highlightOptions = highlightOptions(fillColor = "white",
-                                                 fillOpacity = 0.9,
-                                                 weight = 2,
-                                                 bringToFront = TRUE),
+```
 
+Sankey diagram
 
+```{r}
 
+library(networkD3)
+library(devtools)
+#install_github("Displayr/flipPlots") #install from github
+library(flipPlots)
+library(plyr)
+library(dplyr)
+
+# remove zero values
+zero_values <- which(meteorites$mass == 0)
+meteorites_all <- meteorites[-zero_values, ]
+# remove NAs for mass
+meteorites_all <- meteorites %>%
+  na.omit()
+
+# how many meteorites have fallen?
+fallen <- meteorites_all %>%
+  filter(fall == "Fell") %>%
+  dplyr::summarise(Count = n())
+
+# how many meteorites have been found?
+found <- meteorites_all %>%
+  filter(fall == "Found") %>%
+  dplyr::summarise(Count = n())
+
+summary(meteorites_all$mass)
+hist(meteorites_all$mass, breaks = 10, freq = T)
+
+# how many meteorites in each class
+meteorites_all_class <- fct_collapse(meteorites_all$class,
+             scc = stony_chondrites_carbonaceous,
+             sco = stony_chondrites_ordinary,
+             sce = stony_chondrites_enstatite,
+             sc = stony_chondrites,
+             spa = stony_primitive_achondrites,
+             sa = stony_achondrites,
+             sia = stony_iron_achondrites,
+             ia = iron_achondrites,
+             ou = other_unknown)
+
+meteorites_all$class <- as.factor(meteorites_all_class)
+
+levels(meteorites_all$class)
+
+meteorites_all$class <- revalue(meteorites_all$class,
+        c("scc" = "Stony Chondrites - Carbonaceous",
+          "sco" = "Stony Chondrites - Ordinary",
+          "sce" = "Stony Chondrites - Enstatite",
+          "sc" = "Stony Chondrites",
+          "spa" = "Stony Primitive Achondrites",
+          "sa" = "Stony Achondrites",
+          "sia" = "Stony-Iron Achondrites",
+          "ia" = "Iron Achondrites",
+          "ou" = "Other / Unknown"))
+
+meteorites_all$fall <- as.factor(meteorites_all$fall)
+
+meteorites_all$masscat <- cut(meteorites_all$mass, c(-1, 49, 99, 999, 9999, Inf),
+                              labels = c("0-49g", "50-99g", "100g-999g", "1kg-9.999kg", "10kg-60 tonnes"))
+
+classes <- meteorites_all %>%
+  group_by(fall, masscat, class) %>%
+  dplyr::summarise(Count = n())
+
+colourpalette <- c("grey80", "grey60",
+                   "#AED6F1", "#5DADE2", "#3498DB", "#2E86C1", "#2874A6",
+                   "red", "purple", "orange", "pink", "green", "darkgreen", "yellow", "coral")
+
+SankeyDiagram(classes[ ,-4],
+              link.color = "Source",
+              weights = classes$Count, 
+              label.show.counts = TRUE,
+              label.show.varname = F,
+              font.family = "Avenir",
+              hovertext.show.percentages = T,
+              sinks.right = F,
+              colors = colourpalette)
 
 ```
 

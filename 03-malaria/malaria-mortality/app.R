@@ -25,7 +25,8 @@ world <- ne_countries(scale = "medium", returnclass = "sf")
 
 malaria_deaths$deaths <- malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
 
-malaria_deaths$iso_a2 <- countrycode(malaria_deaths$Code, "iso3c", "iso2c") 
+malaria_deaths$iso_a2 <- countrycode(malaria_deaths[[2]], "iso3c", "iso2c") 
+
 
 africa <- world %>% 
     filter(continent == "Africa") %>% 
@@ -33,6 +34,7 @@ africa <- world %>%
     left_join(malaria_deaths, by = "iso_a2") %>% 
     dplyr::select(Entity, Year, deaths) %>% 
     st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
+
 
 # ui
 ui <- fluidPage(theme = shinytheme("united"),
