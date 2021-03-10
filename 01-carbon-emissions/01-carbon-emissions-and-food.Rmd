@@ -20,8 +20,7 @@ setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Anal
 
 ## Introduction
 
-This dataset contains information about 130 countries, their consumption and emissions of 11 types of food.
-
+This dataset comes from nu3 (www.nu3.de), a Germany based nutrition and health company.  It was complied for the #TidyTuesday data visualisation challenge by Kasia Kulma in February 2020. They obtained and analysed data from the Food and Agriculture Organisation. The dataset contains the annual CO2 emissions and consumption levels per person for 11 food categories in 130 countries (beef, pork, poultry, lamb/goat, fish, dairy products, wheat, rice, soybeans, nuts, eggs). It was created originally to compare the differences between plant based and animal-product based diets, but it gives a good overview of the consumption and emissions from these food categories throughout the world. 
 
 ```{r }
 food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
@@ -89,7 +88,7 @@ continents <- unique(food_consumption$continent) # five continents here
 
 # create colour palette of 5 colours
 
-palette <- c("#ef476f", "#ffd166", "#06d6a0", "#118ab2", "#073b4c")
+palette <- c("#ef476f", "#ffa600", "#06d6a0", "#118ab2", "#670067")
 
 colour_frame <- data.frame(continents, palette)
 
@@ -110,10 +109,14 @@ food_plot$continent <- as.factor(food_plot$continent)
 
 # remove 0 values to clean up plot
 food_plot$consumption[which(food_plot$consumption == 0)] = NA
-na.omit(food_plot)
+food_plot <- na.omit(food_plot)
+
+food_plot %>%
+  group_by(food_category, continent) 
+
 
 # make object containing labels for boxplot, in the right order!
-xlabels <- c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Pork", "Soybeans")
+xlabels <- c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Pork", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Soybeans")
 
 # make food category a factor and set the order as above.
 food_plot$food_category <- factor(food_plot$food_category, levels = c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Pork", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Soybeans"), ordered = T)
@@ -121,6 +124,9 @@ food_plot$food_category <- factor(food_plot$food_category, levels = c("Dairy", "
 boxplot(consumption ~ reorder(food_category, consumption),
         data = food_consumption)
 # -----------------------------------------------------------------
+
+png(filename = "consumption02.png",
+    width = 28, height = 22, unit = "cm", res = 300)
 
 set.seed(42) # so that the jitter function remains the same each time...
 
@@ -143,6 +149,14 @@ boxplot(consumption ~ food_category,
 title("Dairy and wheat products are the most widely eaten food types worldwide",
       family = "Avenir",
       line = 0,
+      adj = 0.5,
+      cex = 2)
+
+title(sub = "This boxplot shoes the consumption level of 11 food categories in 130 countries worldwide",
+      family = "Avenir",
+      cex = 0.5,
+      col.sub = "grey40",
+      line = -33,
       adj = 0.5)
       
 title(ylab = "Consumption (kg/person/year)",
@@ -198,22 +212,103 @@ stripchart(consumption ~ food_category,
            method = "jitter", add = T, 
            at = c(1.4, 2.9, 4.4, 5.9, 7.4, 8.9, 10.4, 11.9, 13.4, 14.9, 16.4),
            pch = 16)
-legend( x = 12, y = 200,
-  legend = paste(levels(food_plot$continent)),
-  col = alpha(palette, 0.5),
-  pch = 16, 
-  cex = 1, bty = "n")
 
 # add text annotations using expression and phantom strings for multicoloured
-text(x = 5, y = 300,
-     expression("Europe "*phantom("leads the way on dairy consumption")),
+# Europe
+text(x = 2.8, y = 300,
+     expression("Europe "*phantom("has the highest")),
      col = palette[4],
-     size = 2)
-text(x = 5, y = 300,
-     expression(phantom("Europe ")*"leads the way on dairy consumption"),
-     col = "black",
-     size = 2)
+     family = "Avenir",
+     cex = 0.7)
+text(x = 2.8, y = 300,
+     expression(phantom("Europe ")*"has the highest"),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 2.8, y = 289,
+     "consumption levels of\ndairy products",
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
 
+# Asia 
+text(x = 4.5, y = 217,
+     "Rice consumption in",
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 4.5, y = 210,
+     expression("many"*phantom(" Asian")*" countries"),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 4.5, y = 210,
+     expression(phantom("many")*" Asian"*phantom(" countries")),
+     col = palette[3],
+     family = "Avenir",
+     cex = 0.7)
+text(x = 4.5, y = 195,
+     expression("is higher than on\nother continents"),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+
+# Africa
+text(x = 7.5, y = 150,
+     expression("Countries in "*phantom("Africa")*" consume the"),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 7.5, y = 150,
+     expression(phantom("Countries in ")*"Africa"*phantom(" consume the")),
+     col = palette[1],
+     family = "Avenir",
+     cex = 0.7)
+text(x = 7.5, y = 143,
+     "lowest quantities of animal products",
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+
+# Americas
+text(x = 14, y = 80,
+     "Animal products are consumed at",
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 14, y = 73,
+     expression("higher levels in"*phantom(" America")),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 14, y = 73,
+     expression(phantom("higher levels in")*" America"),
+     col = palette[2],
+     family = "Avenir",
+     cex = 0.7)
+
+# Oceania
+
+text(x = 10, y = 120,
+     expression("Food consumption in"*phantom(" Oceania")*" is"),
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+text(x = 10, y = 120,
+     expression(phantom("Food consumption in")*" Oceania"*phantom(" is")),
+     col = palette[5],
+     family = "Avenir",
+     cex = 0.7)
+text(x = 10, y = 100,
+     "consistently around the average
+point. This lower variation may
+be due to it being the smallest
+continent",
+     col = "grey40",
+     family = "Avenir",
+     cex = 0.7)
+
+dev.off()
 
 
 ```

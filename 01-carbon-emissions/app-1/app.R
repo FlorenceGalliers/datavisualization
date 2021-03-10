@@ -12,22 +12,27 @@ library(ggplot2)
 library(waffle)
 library(rsconnect)
 
+# import data from tidytuesday
 tuesdata <- tidytuesdayR::tt_load('2020-02-18')
+# assign to object
 food_consumption <- tuesdata$food_consumption
+# look at levels
 levels(food_consumption$food_category)
+# rename the longer ones
 food_consumption$food_category <- revalue(food_consumption$food_category,
                                           c("Lamb & Goat" = "Lamb/Goat",
                                             "Milk - inc. cheese" = "Dairy",
                                             "Nuts inc. Peanut Butter" = "Nuts",
                                             "Wheat and Wheat Products" = "Wheat"))
 
+# create new variable just containing country, food category and carbon emissions
 footprint <- food_consumption %>%
   select(country, food_category, co2_emmission)
-
+# create new variable just containing country, food category and consumption levels
 consumption_all <- food_consumption %>%
   select(country, food_category, consumption)
 
-
+# colours for food categories
 food_colours <- c("#e31a1c",
                   "#ffcc00",
                   "#1f78b4",
@@ -39,7 +44,7 @@ food_colours <- c("#e31a1c",
                   "#cab2d6",
                   "#33a02c",
                   "#b2df8a")
-
+# names of categories
 category_names <- c("Beef",
                     "Eggs",
                     "Fish",
@@ -55,12 +60,12 @@ category_names <- c("Beef",
 footprint_total <- footprint %>%
   select(country, co2_emmission) %>%
   group_by(country) %>%
-  summarise(total = sum(co2_emmission))
+  dplyr::summarise(total = sum(co2_emmission))
 
 consumption_total <- consumption_all %>%
   select(country, consumption) %>%
   group_by(country) %>%
-  summarise(total = sum(consumption))
+  dplyr::summarise(total = sum(consumption))
 
 category_data <- c(rep(1, 11))
 

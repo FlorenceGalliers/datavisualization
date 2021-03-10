@@ -554,26 +554,88 @@ dev.off()
 
 ```
 
-Network plot
-
+Plot 4
 ```{r}
 
-library(igraph)
-library(networkD3)
+devtools::install_github("jeromefroe/circlepackeR")
+library(circlepackeR)
+library(data.tree)
+library(d3treeR)
+library(packcircles)
+library(ggplot2)
+library(viridis)
+library(ggiraph)
+library(tidyverse)
 
-# create a dataset:
-data <- data_frame(
-  from=c("A", "A", "B", "D", "C", "D", "E", "B", "C", "D", "K", "A", "M"),
-  to=c("B", "E", "F", "A", "C", "A", "B", "Z", "A", "C", "A", "B", "K")
-)
+malaria_2015 <- malaria_inc %>%
+  filter(Year == 2015)
 
-# Plot
-p <- simpleNetwork(data, height="100px", width="100px")
+malaria_2015$continent <- countrycode(malaria_2015$Entity, "country.name", "continent")
 
-p
+malaria_2015 <- malaria_2015 %>%
+  na.omit()
 
+malaria_2015$incidence <-  malaria_2015$`Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)`
 
+head(malaria_2015)
+malaria <- malaria_2015[ ,-c(2,3,4)]
+head(malaria)
 
+malaria <- malaria %>%
+  filter(incidence > 0)
+
+data <- malaria
+
+# Add a column with the text you want to display for each bubble:
+data$text <- paste("Country: ", data$Entity, "\n",
+                   "Incidence Rate:", data$incidence, "\n",
+                   "Continent: ", data$continent, "\n" )
+
+# Generate the layout
+packing <- circleProgressiveLayout(data$incidence, sizetype='area')
+data <- cbind(data, packing)
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+dat.gg$value <- rep(data$incidence, each = 51)
+
+tooltip_css <- "color:white;padding:10px;font-family: Avenir;border-radius:5px;"
+
+  
+# Make the plot with a few differences compared to the static version:
+p <- ggplot() + 
+  geom_polygon_interactive(data = dat.gg, 
+                           aes(x, y, 
+                               group = id, 
+                               fill = -value, 
+                               tooltip = data$text[id], 
+                               data_id = id), 
+                           colour = "black", 
+                           alpha = 0.6) +
+  scale_fill_viridis() +
+  geom_text(data = data, 
+            aes(x, y, 
+                label = gsub("Country: ", "", Entity),
+                size = incidence), 
+            color="black",
+            family = "Avenir") +
+  scale_size_continuous(range = c(1,3)) +
+  theme_void() + 
+  labs(title = "Malaria Incidence Rates in 2015") +
+  theme(legend.position = "none", 
+        plot.margin = unit(c(0,0,0,0),"cm"),
+        plot.title = element_text(
+          size = 20,
+          family = "Avenir"
+        )) + 
+  coord_equal() 
+
+# Turn it interactive
+widg <- girafe(ggobj = p, 
+                fonts = "Avenir",
+                options = list(
+                  opts_tooltip(use_fill = T, css = tooltip_css),
+                  opts_hover_inv(css = "opacity:0.4;")))
+print(widg)
 
 ```
 
