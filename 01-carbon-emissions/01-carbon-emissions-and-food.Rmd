@@ -23,7 +23,11 @@ setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Anal
 This dataset comes from nu3 (www.nu3.de), a Germany based nutrition and health company.  It was complied for the #TidyTuesday data visualisation challenge by Kasia Kulma in February 2020. They obtained and analysed data from the Food and Agriculture Organisation. The dataset contains the annual CO2 emissions and consumption levels per person for 11 food categories in 130 countries (beef, pork, poultry, lamb/goat, fish, dairy products, wheat, rice, soybeans, nuts, eggs). It was created originally to compare the differences between plant based and animal-product based diets, but it gives a good overview of the consumption and emissions from these food categories throughout the world. 
 
 ```{r }
+# import data from tidy tuesday github
 food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
+
+head(food_consumption)
+# country - food category - consumption - co2 emission level
 
 # How many countries?
 unique(food_consumption$country)
@@ -60,15 +64,15 @@ top10 <- totals %>%
   filter(totals$difference >= (tail(sort(totals$difference), 5))[1] | 
            totals$difference <= (head(sort(totals$difference), 5))[5])
 
-dotchart(sort(top10$difference), top10$country,
-     pch = 16,
-     col = "red")
+#dotchart(sort(top10$difference), top10$country,
+#     pch = 16,
+#     col = "red")
 
+# i like this idea between the countries that have the largest and the smallest differences between consumption and carbon emission levels... but its not very easy to understand.
 
 ```
 
-Consumption per food category worldwide?
-So which food category is most popular 
+Consumption 01 - Base R Graphics:
 
 ```{r}
 # make category a factor
@@ -82,15 +86,13 @@ food_consumption$food_category <- revalue(food_consumption$food_category,
           "Wheat and Wheat Products" = "Wheat"))
 
 # I want to colour the points by continent. so need to add a new column to the data called continent.
-
 food_consumption$continent <- countrycode(food_consumption$country, 'country.name', 'continent')
 continents <- unique(food_consumption$continent) # five continents here
 
 # create colour palette of 5 colours
-
 palette <- c("#ef476f", "#ffa600", "#06d6a0", "#118ab2", "#670067")
 
-colour_frame <- data.frame(continents, palette)
+#colour_frame <- data.frame(continents, palette)
 
 food_plot <- merge(food_consumption, colour_frame,
       by.x = "continent",
@@ -99,21 +101,12 @@ food_plot <- merge(food_consumption, colour_frame,
 
 food_plot$continent <- as.factor(food_plot$continent)
 
-#names(food_plot)[names(food_plot) == "palette"] <- "pal"
-# make colour palette
-#levels(food_plot$continent)
-#color_pallete_function <- colorRampPalette(
-#  colors = c("#ef476f", "#ffd166", "#06d6a0", "#118ab2", "#073b4c"))
-#num_colors <- nlevels(food_plot$continent)
-#food_color_colors <- color_pallete_function(num_colors)
-
 # remove 0 values to clean up plot
 food_plot$consumption[which(food_plot$consumption == 0)] = NA
 food_plot <- na.omit(food_plot)
 
 food_plot %>%
   group_by(food_category, continent) 
-
 
 # make object containing labels for boxplot, in the right order!
 xlabels <- c("Dairy", "Wheat", "Rice", "Poultry", "Fish", "Pork", "Beef", "Eggs", "Nuts", "Lamb/Goat", "Soybeans")
@@ -125,6 +118,7 @@ boxplot(consumption ~ reorder(food_category, consumption),
         data = food_consumption)
 # -----------------------------------------------------------------
 
+# open png file to save plot into
 png(filename = "consumption02.png",
     width = 28, height = 22, unit = "cm", res = 300)
 
@@ -145,25 +139,22 @@ boxplot(consumption ~ food_category,
         frame = F,
         boxwex = 1.2) # remove frame box around plot
 
-# add title to plot, and x and y axis labels
+# add title to plot, subtitle and x and y axis labels
 title("Dairy and wheat products are the most widely eaten food types worldwide",
       family = "Avenir",
       line = 0,
       adj = 0.5,
       cex = 2)
-
 title(sub = "This boxplot shoes the consumption level of 11 food categories in 130 countries worldwide",
       family = "Avenir",
       cex = 0.5,
       col.sub = "grey40",
       line = -33,
       adj = 0.5)
-      
 title(ylab = "Consumption (kg/person/year)",
       xlab = "Food Category",
       family = "Avenir",
       line = 2.5)
-
 
 # Insert y axis
 axis(2, seq(0, 350, 50), # set labels and breaks
@@ -176,8 +167,7 @@ axis(1, at = c(1, 2.5, 4, 5.5, 7, 8.5, 10, 11.5, 13, 14.5, 16),
      labels = xlabels, # position and labels
      cex.axis = 0.9, family = "Avenir", # font size and style
      tick = F, # remove tick marks
-     line = -1.6 # move x axis labels up towards plot
-     )
+     line = -1.6) # move x axis labels up towards plot
 
 # add strip charts for each continent
 stripchart(consumption ~ food_category, 
@@ -309,12 +299,11 @@ continent",
      cex = 0.7)
 
 dev.off()
-
+# end of saved plot.
 
 ```
 
-Battle of the animals
-- Which meat is consumed most widely across the world, and which contributes the most CO2 emissions?
+Consumption 02 - ggplot graph
 
 ```{r}
 # filter the dataset to only contain meat categories:
@@ -408,7 +397,7 @@ israel <- meat %>%
 colpal <- c("#ff6361", "#58508d", "#ffa600", "#003f5c", "#bc5090")
 
 # Plot a strip chart
-consumption02 <- ggplot(meat_edit, 
+consumption03 <- ggplot(meat_edit, 
        aes(x = reorder(food_category, co2_emmission), 
            y = co2_emmission, 
            size = consumption)) +
@@ -492,11 +481,12 @@ consumption02 <- ggplot(meat_edit,
 
 consumption02
 
-ggsave(filename = "consumption02.png", plot = consumption02,
+ggsave(filename = "consumption03.png", plot = consumption03,
        width = 24, height = 20, units = "cm")
 
 ```
 
+Consumption 04 - Map of Dairy Consumption in Europe
 
 ```{r}
 # subset dairy category into its own object
@@ -504,45 +494,53 @@ dairy <- food_consumption %>%
   filter(food_category == "Dairy") %>%
   dplyr::select(country, consumption)
 
+# import libraries
 library(sf)
 library(viridis)
 library(rnaturalearth)
 
+# use natural earth library to get world map sf shapes
 world <- ne_countries(scale = "medium", returnclass = "sf")
 class(world)
 
+# merge world map with dairy data
 world_dairy <- st_as_sf(merge(dairy, world,
                      by.x = "country",
                      by.y = "name",
                      all.x = TRUE))
 
+# subset to only contain countries in Europe
 europe_dairy <- world_dairy %>%
   subset(continent == "Europe")
 
+# Create new object containing labels, but remove Russia as this is not included
 europe_labels <- europe_dairy %>%
   dplyr::select(country, geometry, consumption) %>%
   filter(country != "Russia")
 
+# This is for the top of the legend
 finland_label <- europe_labels %>%
   filter(country == "Finland")
 
+# This is for the bottom of the legend
 belarus_label <- europe_labels %>%
   filter(country == "Belarus")
 
-
+# set seed because ggrepel package uses randomness
 set.seed(41)
 
-consumption03 <- ggplot(data = europe_dairy) +
-  geom_sf(aes(fill = consumption), color = "grey30") +
-  labs(title = "") +
+# plot
+consumption04 <- ggplot(data = europe_dairy) +
+  geom_sf(aes(fill = consumption), color = "grey30") + #fill countries by their consumption level
+  labs(title = "") + # no title
   scale_fill_viridis(option = "D", na.value = "grey80",
-                     direction = -1,
+                     direction = -1, # reverse direction of colours so that finland is darkest colour
                      guide = guide_colourbar(),
-                     breaks = c(150, 200, 250, 300, 350, 400),
+                     breaks = c(150, 200, 250, 300, 350, 400), # custom breaks
                      labels = c("150kg/person/year", "200", "250", "300", "350", "400")) +
   coord_sf(xlim = c(-25.5, 32.87), ylim = c(30.15, 69.5), expand = FALSE,
-           clip = "off") +
-  theme_void() +
+           clip = "off") + # so labels can be outside plot area
+  theme_void() + # remove theme
   ggrepel::geom_label_repel(data = europe_labels, 
                             aes(label = country, geometry = geometry),
                             stat = "sf_coordinates",
@@ -550,7 +548,7 @@ consumption03 <- ggplot(data = europe_dairy) +
                 min.segment.length = 10,
                 color = "grey25",
                 family = "American Typewriter") +
-  # add subtitle for finland
+  # add label for Finland
   geom_label(data = finland_label, 
                aes(label = country, fill = consumption), 
                x = -18, y = 55.5,
@@ -558,6 +556,7 @@ consumption03 <- ggplot(data = europe_dairy) +
              label.padding = unit(0.2, "cm"),
                 color = "white",
              family = "American Typewriter") +
+  # add label for belarus
     geom_label(data = belarus_label, 
                aes(label = country, fill = consumption), 
                x = -18, y = 43.7,
@@ -579,20 +578,12 @@ consumption03 <- ggplot(data = europe_dairy) +
            label = "Who consumes the most\ndairy products?",
            family = "American Typewriter",
            size = 7) +
-  guides(fill = guide_colorbar(barwidth = 1, 
+  guides(fill = guide_colorbar(barwidth = 1,  # change size of the legend colourbar
                                barheight = 10))
 
-consumption03
-
-ggsave(filename = "consumption03.png", plot = consumption03,
+# save plot
+ggsave(filename = "consumption04.png", plot = consumption04,
        width = 28, height = 24, unit = "cm")
-
-#mypalette <- colorNumeric( palette="magma",
-#                           domain=world_dairy$consumption, na.color="transparent")
-
-#leaflet(world_dairy) %>%
-#  addTiles() %>%
-#  addPolygons(fillColor = ~mypalette(consumption), stroke = F)
 
 
 ```

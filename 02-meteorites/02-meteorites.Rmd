@@ -103,6 +103,8 @@ meteorites_total3 <- meteorites3 %>%
 
 ```
 
+Meteorites 01 - Base R Graphics
+
 ```{r}
 # now lets make a plot using base R with this subset of data of fallen meteorites between 1750 and 2010
 
@@ -117,6 +119,7 @@ section2 <- "Scientific knowlegde of meteorites increased\nduring the 19th centu
 
 section3 <- "The number of meteorites has\nrecently stablised, there may\nalso be a time lag between a\nmeteorite falling and its\nappearance in records."
 
+# open png file to save plot into
 png(filename = "meteorites01.png", width = 30, height = 20, units = "cm", res = 300)
 
 # plot
@@ -246,8 +249,11 @@ points(x = meteorites_total3$decade,
        col = "#6798C0")
 
 dev.off()
+# end of saving plot.
 
 ```
+
+Meteorites 02 - ggplot
 
 ```{r}
 # using ggplot plot about the largest 20 meteorites that have fallen.
@@ -393,16 +399,21 @@ ggsave(filename = "meteorites02.png", plot = meteorites02,
 
 ```
 
-Interactive plot: where are the meteorites in the world?
+Meteorites 03 - Interactive plot: 
+Where are the meteorites in the world and what kind are they?
 
 ```{r}
 
+# import packages
 library(leaflet)
 library(forcats)
 library(leaflet.extras)
 
+# have a look at classes
 meteorites$class <- factor(meteorites$class)
-unique(meteorites$class)
+unique(meteorites$class) # there is a lot...
+
+# commit to manually assigning all of the classes to only 9 umbrella classifications. This took time, but I could not think of another way to do this -- come back to this?
 
 stony_chondrites_carbonaceous <- c("CR2-an", "CI1", "CV3", "CM2", "OC", "C2-ung",
                                    "CO3.3", "CBa", "CR2", "CO3.2", "CK4", "CO3.5", 
@@ -505,7 +516,7 @@ iron_achondrites <- c("Iron, IVA", "Iron, IIAB", "Iron, IAB-sLL", "Iron, ungroup
 
 other_unknown <- c("Unknown")
 
-
+# use forcats package fct_collapse function to collapse the classes down into the above defined groupings
 meteorites_class <- fct_collapse(meteorites$class,
              scc = stony_chondrites_carbonaceous,
              sco = stony_chondrites_ordinary,
@@ -517,10 +528,12 @@ meteorites_class <- fct_collapse(meteorites$class,
              ia = iron_achondrites,
              ou = other_unknown)
 
+# turn it into a factor
 meteorites$class <- as.factor(meteorites_class)
-
+# have a look at levels
 levels(meteorites_class)
 
+# create object that contains labels for use in legend in leaflet plot
 labels <- c("Stony Primitive Achondrites",
             "Stony Achondrites",
             "Stony Chondrites - Carbonaceous",
@@ -536,6 +549,7 @@ bins <- c(0, 20, 40, 60, 80, 120, 150, Inf)
 # create palette
 palette <- colorFactor("Paired", domain = meteorites$class)
     
+# create text for label
 mytext <- paste(meteorites$name,
                     "<br/>",
                     meteorites$year,
@@ -544,9 +558,10 @@ mytext <- paste(meteorites$name,
                     "<br/>",
                     sep="") %>%
       lapply(htmltools::HTML)
-    
+  
+# leaflet map!
 leaflet(meteorites) %>% 
-  addProviderTiles(providers$CartoDB.DarkMatter) %>%
+  addProviderTiles(providers$CartoDB.DarkMatter) %>% # dark background map for dark night sky effect!
   setView(lat = 20, lng = 0, zoom = 1.6) %>%
   addCircleMarkers(~long, ~lat, # Points for circles
              fillColor = ~palette(class), 
@@ -554,12 +569,12 @@ leaflet(meteorites) %>%
              color = "white",  # colour of edge?
              radius = ~log(mass), # radius
              stroke = FALSE, # no edge on circles
-             weight = 1,# hmm edge of lines?
+             weight = 1,# edge of lines?
              clusterOptions = markerClusterOptions(
-               disableClusteringAtZoom = 4,
-               spiderfyOnMaxZoom = F
+               disableClusteringAtZoom = 4, # stop the clustering when zoomed in so can see all the points
+               spiderfyOnMaxZoom = F # dont make spiderfy effect
              ),
-    label = mytext, 
+    label = mytext,  # this was created above
     labelOptions = labelOptions(style = list("font-weight" = "normal",
                                              padding = "3px 8px"), 
                                 textsize = "13px", 
@@ -569,14 +584,14 @@ leaflet(meteorites) %>%
             values = ~class,
             title = "Class of Meteorite",
             opacity = 1,
-            labFormat = function(type, cuts, p) {  # Here's the trick
+            labFormat = function(type, cuts, p) {  
                                                   paste0(labels)
                              }
                              ) 
 
 ```
 
-Sankey diagram
+Meteorites 04 - Sankey Diagram
 
 ```{r}
 
@@ -607,7 +622,7 @@ found <- meteorites_all %>%
 summary(meteorites_all$mass)
 hist(meteorites_all$mass, breaks = 10, freq = T)
 
-# how many meteorites in each class
+# how many meteorites in each class, use above classifications
 meteorites_all_class <- fct_collapse(meteorites_all$class,
              scc = stony_chondrites_carbonaceous,
              sco = stony_chondrites_ordinary,
@@ -619,10 +634,11 @@ meteorites_all_class <- fct_collapse(meteorites_all$class,
              ia = iron_achondrites,
              ou = other_unknown)
 
+# make into a factor
 meteorites_all$class <- as.factor(meteorites_all_class)
-
 levels(meteorites_all$class)
 
+# revalue the factor levels to be the full names again... annoying...
 meteorites_all$class <- revalue(meteorites_all$class,
         c("scc" = "Stony Chondrites - Carbonaceous",
           "sco" = "Stony Chondrites - Ordinary",
@@ -634,21 +650,26 @@ meteorites_all$class <- revalue(meteorites_all$class,
           "ia" = "Iron Achondrites",
           "ou" = "Other / Unknown"))
 
+# make the fall column a factor
 meteorites_all$fall <- as.factor(meteorites_all$fall)
 
+# make a new column that turns the meteorite masses into categorical variables
 meteorites_all$masscat <- cut(meteorites_all$mass, c(-1, 49, 99, 999, 9999, Inf),
                               labels = c("0-49g", "50-99g", "100g-999g", "1kg-9.999kg", "10kg-60 tonnes"))
 
+# new object, group meteorites by fall, mass category and class and then summarise how many of each there are.
 classes <- meteorites_all %>%
   group_by(fall, masscat, class) %>%
   dplyr::summarise(Count = n())
 
+# create colour palette
 colourpalette <- c("grey60", "grey80",
                    "#AED6F1", "#5DADE2", "#3498DB", "#2874A6", "#1A5276",
                    "#7D3C98", "#AF7AC5", "#27AE60", "#27AE60", "#ABEBC6", "#1ABC9C", "#C0392B", "#F1C40F")
 
+# Sankey
 SankeyDiagram(classes[ ,-4],
-              link.color = "Source",
+              link.color = "Source", 
               weights = classes$Count, 
               label.show.counts = TRUE,
               label.show.varname = F,

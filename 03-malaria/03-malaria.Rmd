@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+# set up and install packages
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -24,9 +25,11 @@ setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Anal
 
 ```
 
-Malaria. 1990 to 2016.
+This set of visualisations have been created using three different but related datasets about malaria incidence and mortality rates around the world. The datasets were created by ‘Our World in Data’ (https://ourworldindata.org/malaria). They also formed part of the #TidyTuesday data visualisation challenge in December 2018. The datasets contain the following data:
+-	Malaria incidence by country for all ages in 2000, 2005, 2010 and 2015.
+-	Annual malaria death rate by country for all ages between 1990 and 2016.
+-	Annual total malaria deaths by country, split into 5 age groups, between 1990 and 2016.
 
-Three datasets are used to create these visualizations. They come from ‘Our World in Data’ and contain information about malaria incidence and deaths in every country worldwide.
 
 ```{r}
 # Get data
@@ -56,6 +59,8 @@ malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group,
 unique(malaria_deaths_age$year)
 # year goes from 1990 to 2016
 ```
+
+Malaria 02 - ggplot
 
 ```{r}
 # Lets go and look at incidence. 2000, 2005, 2010, 2015
@@ -239,10 +244,13 @@ ggsave(filename = "malaria02.png", plot = malaria02,
 
 ```
 
+Malaria 01 - Base R Graphics
 
 ```{r}
+# look at data
 head(malaria_deaths_age)
 
+# make age group into a factor
 malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group, 
                                        levels = c("Under 5",
                                                   "5-14",
@@ -391,17 +399,17 @@ barplot(low_sdi_summary_wide,
         las = 2, cex.names = 0.6, line = -0.8,
         family = "Avenir",
         border = palette)
-
+# add ylab title
 title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
-
+# add xlab title
 title(xlab = "Year",
       family = "Avenir",
       cex.lab = 0.8,
       line = 1.5)
-
+# y axis
 axis(2, las = 2, 
      at = c(0, 50000, 100000, 150000, 
             200000, 250000, 300000, 
@@ -416,13 +424,12 @@ axis(2, las = 2,
      family = "Avenir",
      tck = -0.01, gap.axis = 0.5,
      lwd = 0.5)
-
+# plot title
 title("Low SDI",
       family = "Avenir", 
       cex.main = 1.2)
 
-
-# position at bottom left
+# change position to the bottom left
 par(fig = c(0.01, 0.5, 0, 0.5), new = T)
 
 # make a barplot for middle sdi countries
@@ -435,29 +442,25 @@ barplot(middle_sdi_summary_wide,
         line = -0.8,
         family = "Avenir",
         border = palette)
-
 title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
-
 title(xlab = "Year",
       family = "Avenir",
       cex.lab = 0.8,
       line = 1.5)
-
 axis(2, las = 2, at = c(0, 5000, 10000, 15000, 20000),
      labels = c("0", "5000", "10000", "15000", "20000"),
      cex.axis = 0.5, lwd = 0.5, 
      cex = 0.5, tck = -0.01,
      family = "Avenir")
-
 title("Middle SDI",
       family = "Avenir", 
       cex.main = 1.2,
       col.main = "grey20")
 
-# position bottom right
+# change position to the bottom right
 par(fig = c(0.5, 0.99, 0, 0.5), new = T)
 # make a barplot for high sdi countries
 barplot(high_sdi_summary_wide,
@@ -469,29 +472,23 @@ barplot(high_sdi_summary_wide,
         line = -0.8,
         family = "Avenir",
         border = palette)
-
 title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
-
 title(xlab = "Year",
       family = "Avenir",
       cex.lab = 0.8,
       line = 1.5)
-
 axis(2, las = 2, at = c(0, 5, 10, 15),
      labels = c("0", "5", "10", "15"),
      cex.axis = 0.5, lwd = 0.5,
      cex = 0.5, tck = -0.01,
      family = "Avenir")
-
-
 title("High SDI",
       family = "Avenir", 
       cex.main = 1.2,
       col.main = "grey20")
-
 
 # add titles and text to top left of plot
 par(fig = c(0, 0.5, 0.5, 1))
@@ -503,7 +500,7 @@ par(fig = c(0, 0.5, 0.5, 1))
 #       cex = 0.3, horiz = T, pt.cex = 1,
 #       bty = "n")
 
-# add rectangles and text for legend instead
+# add rectangles and text for legend instead because the legend functionality in Base R is not doing what I want it to when messing with the par() settings
 rect(4, 3, 8, 4, 
      col = palette[1])
 rect(9, 3, 13, 4, 
@@ -525,36 +522,33 @@ text(21, 3.5, label = age_groups[4],
      family = "Avenir", cex = 0.6)
 text(26, 3.5, label = age_groups[5],
      family = "Avenir", cex = 0.6)
-
+# add label on left of the 'legend' rectangles
 text(1.5, 3.5, label = "Age Group:", 
      family = "Avenir", cex = 0.6)
-
-
-
+# add title
 text(x = 16, y = 13, 
      "Childhood deaths from malaria are 300,000x\nhigher in countries that are less developed",
      family = "Avenir",
      cex = 1.12)
-
+# add subtitle
 text(x = 16, y = 8, 
      "Depending on a countries socio-demographic index (SDI)\nthere is a huge difference between the number of deaths,\nthe distribution of these deaths between age groups and the\nrate of decrease over time. The SDI is a scale that identifies\na countries position on the spectrum of development.",
      family = "Avenir",
      cex = 0.7)
-
+# add note
 text(x = 16, y = 1,
      "Please note the extreme differences in scales of the\nnumber of deaths per year for the three graphs",
      family = "Avenir",
      cex = 0.7)
 
-
 # end plot
 dev.off()
 
 
-
 ```
 
-Plot 4
+Malaria 04 - Circle Packing Plot
+
 ```{r}
 
 devtools::install_github("jeromefroe/circlepackeR")
@@ -567,20 +561,24 @@ library(viridis)
 library(ggiraph)
 library(tidyverse)
 
+# subset incidence data to just 2015
 malaria_2015 <- malaria_inc %>%
   filter(Year == 2015)
 
+# make new column for continent
 malaria_2015$continent <- countrycode(malaria_2015$Entity, "country.name", "continent")
-
+# remove NA values
 malaria_2015 <- malaria_2015 %>%
   na.omit()
-
+# reduce column name (this is just making a new column...)
 malaria_2015$incidence <-  malaria_2015$`Incidence of malaria (per 1,000 population at risk) (per 1,000 population at risk)`
-
+# check data is looking okay
 head(malaria_2015)
+# subset only the needed columns
 malaria <- malaria_2015[ ,-c(2,3,4)]
 head(malaria)
 
+# remove any 0 values
 malaria <- malaria %>%
   filter(incidence > 0)
 
@@ -596,17 +594,18 @@ packing <- circleProgressiveLayout(data$incidence, sizetype='area')
 data <- cbind(data, packing)
 dat.gg <- circleLayoutVertices(packing, npoints = 50)
 
+# 50 points for each circle so 51 repetitions here
 dat.gg$value <- rep(data$incidence, each = 51)
 
+# style settings for tooltip popups
 tooltip_css <- "color:white;padding:10px;font-family: Avenir;border-radius:5px;"
 
-  
-# Make the plot with a few differences compared to the static version:
-p <- ggplot() + 
+# make the plot
+plot_malaria <- ggplot() + 
   geom_polygon_interactive(data = dat.gg, 
                            aes(x, y, 
                                group = id, 
-                               fill = -value, 
+                               fill = -value, # make highest incidence the darkest colouts
                                tooltip = data$text[id], 
                                data_id = id), 
                            colour = "black", 
@@ -630,12 +629,12 @@ p <- ggplot() +
   coord_equal() 
 
 # Turn it interactive
-widg <- girafe(ggobj = p, 
+int_malaria <- girafe(ggobj = plot_malaria, 
                 fonts = "Avenir",
                 options = list(
                   opts_tooltip(use_fill = T, css = tooltip_css),
                   opts_hover_inv(css = "opacity:0.4;")))
-print(widg)
+print(int_malaria)
 
 ```
 
