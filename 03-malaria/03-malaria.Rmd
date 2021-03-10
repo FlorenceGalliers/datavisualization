@@ -17,6 +17,8 @@ library(countrycode)
 library(GGally)
 library(doBy)
 library(ggrepel)
+library(tidyr)
+library(ggtext)
 
 setwd("/Users/florentinagalliers/Google Drive/Harper/6 Data Visualisation & Analytics/Assignment/datavisualization/03-malaria")
 
@@ -32,7 +34,6 @@ tuesdata <- tidytuesdayR::tt_load('2018-11-13')
 malaria_deaths_age <- tuesdata$malaria_deaths_age
 malaria_deaths <- tuesdata$malaria_deaths
 malaria_inc <- tuesdata$malaria_inc
-
 
 # Explore the datasets
 head(malaria_deaths_age)
@@ -54,29 +55,6 @@ malaria_deaths_age$age_group <- factor(malaria_deaths_age$age_group,
 
 unique(malaria_deaths_age$year)
 # year goes from 1990 to 2016
-
-# make line plot of malaria deaths by year
-world_malaria_deaths <- malaria_deaths %>%
-  subset(Entity == "World")
-
-world_malaria_deaths$deaths <- world_malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
-
-plot(x = world_malaria_deaths$Year,
-     y = world_malaria_deaths$deaths,
-     type = "l",
-     ylim = c(10, 180))
-
-# How many deaths are from Niger? the country with the most deaths
-niger_deaths <- malaria_deaths %>%
-  subset(Entity == "Niger")
-
-niger_deaths$deaths <- niger_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
-
-lines(x = niger_deaths$Year,
-      y = niger_deaths$deaths,
-      type = "l")
-
-# the world malaria deaths are the average, not the total. hmm
 ```
 
 ```{r}
@@ -189,9 +167,7 @@ africa_total_low <- africa_total %>%
 # rename Sao Tome and Principe so it will appear on two lines in the label
 africa_total_low$Entity <- gsub("Sao Tome and Principe", "Sao Tome\nand Principe", africa_total_low$Entity)
 
-
 africa_total_low
-
 
 # plot and make line widths show the number of deaths
 malaria02 <- ggplot(africa_total, aes(x = year, 
@@ -229,11 +205,11 @@ malaria02 <- ggplot(africa_total, aes(x = year,
             color = c("#2A9D8F", "#007362", "#64CFBF"), 
             hjust = "left",
             x = 2015.1,
-            family = "Futura Medium", size = 4,
+            family = "Futura Medium", size = 4, 
             min.segment.length = Inf,
             xlim = c(2015.2, NA)) +
-  labs(title = "There is a still vast disparity in Malaria incidence and death rates throughout Africa",
-       subtitle = "Despite some countries drastically reducing the prevalence of malaria, other countries still have a yearly incidence\nrate of over 400 per 1,000 people at risk",
+  labs(title = "There is vast disparity in the rate of Malaria incidence throughout Africa",
+       subtitle = "Despite some countries <span style = 'color:#007362;'>drastically reducing</span> the prevalence of malaria over the last 15 years, other <br>countries still have a yearly malaria incidence rate of <span style = 'color:#980000;'>over 400 people per 1,000</span> at risk.",
        y = "Incidence Rate (per 1,000 people)",
        x = "Year",
        # change title of legend
@@ -241,27 +217,28 @@ malaria02 <- ggplot(africa_total, aes(x = year,
   theme(
     panel.grid = element_blank(), # remove gridlines
     # titles and subtitles
-    plot.title = element_text(family = "Futura Medium", size = 16),
-    plot.subtitle = element_text(family = "Futura Medium", size = 12, color = "grey40"),
-    axis.title = element_text(family = "Futura Medium", size = 9, hjust = 0.5),
-    axis.text = element_text(family = "Futura Medium", size = 10),
+    plot.title = element_markdown(family = "Futura Medium", size = 16),
+    plot.subtitle = element_markdown(family = "Futura Medium", size = 12, color = "grey40"),
+    axis.title = element_text(family = "Futura Medium", size = 10, hjust = 0.5, color = "grey40"),
+    axis.text = element_text(family = "Futura Medium", size = 10, color = "grey40"),
     # legend
     legend.position = c(0.92, 0.87),
     legend.title = element_text(family = "Futura Medium", size = 10, color = "grey40"),
     legend.text = element_text(family = "Futura Medium", size = 10, color = "grey40"),
     legend.key.width = unit(2, "cm"),
     # margins
-    plot.margin = unit(c(1, 3, 1, 1), "cm")
+    plot.margin = unit(c(1, 3, 1, 1), "cm"),
+    axis.text.y = element_text(hjust = 2),
+    axis.text.x = element_text(vjust = 3)
     ) 
+
+malaria02
 
 ggsave(filename = "malaria02.png", plot = malaria02, 
        width = 28, height = 20, unit = "cm")
 
 ```
 
-Deaths in Mali
-
-We have seen that the malaria incidence in Mali is the highest out of all African countries. What about deaths in Mali?
 
 ```{r}
 head(malaria_deaths_age)
@@ -395,16 +372,16 @@ barplot(middle_sdi_summary_wide,
 # make a comparison barplot between low, middle and high SDI countries.
 palette <- c("#fc8d62", "#66c2a5", "#8da0cb", "#e78ac3", "#a6d854")
 
-age_groups <- c("Under 5", "5-14", "15-49", "50-69", "70 or older")
+age_groups <- c("Under 5", "5-14", "15-49", "50-69", "70+")
 
 years <- seq(1990, 2016, 1)
 
-# write plot into png file, 20cm x 20cm, resolution 300 dpi.
+# write plot into png file, 28cm x 20cm, resolution 300 dpi.
 png(filename = "malaria01.png",
     width = 28, height = 20, units = "cm", res = 300)
 
-# place on left hand side
-par(fig = c(0.5, 1, 0.5, 1))
+# place on right hand side
+par(fig = c(0.5, 0.99, 0.5, 1))
 # make a barplot for low sdi countries
 barplot(low_sdi_summary_wide,
         col = palette, 
@@ -419,6 +396,11 @@ title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
+
+title(xlab = "Year",
+      family = "Avenir",
+      cex.lab = 0.8,
+      line = 1.5)
 
 axis(2, las = 2, 
      at = c(0, 50000, 100000, 150000, 
@@ -441,12 +423,12 @@ title("Low SDI",
 
 
 # position at bottom left
-par(fig = c(0, 0.5, 0, 0.5), new = T)
+par(fig = c(0.01, 0.5, 0, 0.5), new = T)
 
 # make a barplot for middle sdi countries
 barplot(middle_sdi_summary_wide,
         col = palette, 
-        space = 0.2,
+        space = 0.3,
         ylim = c(0, 20000),
         yaxt = "none",
         las = 2, cex.names = 0.6,
@@ -458,6 +440,11 @@ title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
+
+title(xlab = "Year",
+      family = "Avenir",
+      cex.lab = 0.8,
+      line = 1.5)
 
 axis(2, las = 2, at = c(0, 5000, 10000, 15000, 20000),
      labels = c("0", "5000", "10000", "15000", "20000"),
@@ -471,11 +458,11 @@ title("Middle SDI",
       col.main = "grey20")
 
 # position bottom right
-par(fig = c(0.5, 1, 0, 0.5), new = T)
+par(fig = c(0.5, 0.99, 0, 0.5), new = T)
 # make a barplot for high sdi countries
 barplot(high_sdi_summary_wide,
         col = palette, 
-        space = 0.2,
+        space = 0.3,
         ylim = c(0, 15),
         yaxt = "none",
         las = 2, cex.names = 0.6,
@@ -487,6 +474,11 @@ title(ylab = "Number of Deaths from Malaria per Year",
       family = "Avenir",
       cex.lab = 0.8, 
       line = 3)
+
+title(xlab = "Year",
+      family = "Avenir",
+      cex.lab = 0.8,
+      line = 1.5)
 
 axis(2, las = 2, at = c(0, 5, 10, 15),
      labels = c("0", "5", "10", "15"),
@@ -524,15 +516,18 @@ rect(24, 3, 28, 4,
      col = palette[5])
 
 text(6, 3.5, label = age_groups[1],
-     family = "Avenir", cex = 0.5)
+     family = "Avenir", cex = 0.6)
 text(11, 3.5, label = age_groups[2],
-     family = "Avenir", cex = 0.5)
+     family = "Avenir", cex = 0.6)
 text(16, 3.5, label = age_groups[3],
-     family = "Avenir", cex = 0.5)
+     family = "Avenir", cex = 0.6)
 text(21, 3.5, label = age_groups[4],
-     family = "Avenir", cex = 0.5)
+     family = "Avenir", cex = 0.6)
 text(26, 3.5, label = age_groups[5],
-     family = "Avenir", cex = 0.5)
+     family = "Avenir", cex = 0.6)
+
+text(1.5, 3.5, label = "Age Group:", 
+     family = "Avenir", cex = 0.6)
 
 
 
