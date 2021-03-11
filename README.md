@@ -91,7 +91,7 @@ I have mixed feelings about the outcome of this, I think it is quite an informat
 #### Meteorite Location and Classification
 ![Location and classification](./02-meteorites/meteorites03.1.png)
 
-An interactive version of this plot can be found at: https://rpubs.com/florencegalliers/meteorites03 
+[Interactive version of this plot](https://rpubs.com/florencegalliers/meteorites03)
 
 This shows a map of the world with circles locating all the meteorites that have been found or fallen. The circles are sized by the mass of the meteorites, on a log scale as this gave the most user-friendly version. If they were sized by raw mass, there were some extremely large ones and others that were not visible. I tried converting to other units (kg, tonnes), but using a log scale looked the best. If you hover over any point on the map it will display more information about that meteorite (name of meteorite, year it was found, mass). There is also a legend to show the different colours of circles relate to the class that meteorites are in.
 
@@ -99,7 +99,7 @@ This shows a map of the world with circles locating all the meteorites that have
 #### Meteorite Summary
 ![Meteorite Summary](./02-meteorites/meteorites04.png)
 
-An interactive version of this plot can be found at: https://rpubs.com/florencegalliers/meteorites04
+[Interactive version of this plot](https://rpubs.com/florencegalliers/meteorites04)
 
 The final visualisation for this dataset is an interactive Sankey Diagram that splits all meteorites down and summarises them by if they were found or fallen, their weight and then the classification of meteorites. I like how it makes it clear that a huge majority of meteorites are those that have been found, rather than those that have been observed falling and later located. It also highlights that the size of meteorites is often very small.
 
@@ -135,7 +135,7 @@ As Africa is the continent most impacted by Malaria, I decided to focus two of m
 ![Malaria incidence 2015](./03-malaria/malaria04.1.png)
 ![Malaria incidence 2015](./03-malaria/malaria04.2.png)
 
-An interactive version of this plot can be found at: https://rpubs.com/florencegalliers/malaria04
+[Interactive version of this plot](https://rpubs.com/florencegalliers/malaria04)
 
 The last visualisation for this dataset takes a slightly more abstract approach. It shows the incidence of malaria in the year 2015. Each circle represents one country and is sized by the incidence rate. I have used the viridis colour scale against the incidence data. The interactive element is in the form of a popup text box when each circle is moused over, showing the country, continent and incidence rate. The circle is also highlighted when moused over with all other circles becoming fainter to highlight the one that has the mouse over.
 
