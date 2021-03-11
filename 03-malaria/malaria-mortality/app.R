@@ -3,6 +3,8 @@
 ## Florence Galliers
 ## 2020-02-23
 
+# 62687be994b21b7e75c12ea7eae9d323fcb12982
+
 # Packages ####
 library(shiny)
 library(leaflet)
@@ -14,27 +16,6 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(dplyr)
 library(rgeos)
-
-# Get Data ####
-tuesdata <- tidytuesdayR::tt_load('2018-11-13')
-malaria_deaths_age <- tuesdata$malaria_deaths_age
-malaria_deaths <- tuesdata$malaria_deaths
-malaria_inc <- tuesdata$malaria_inc
-
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
-malaria_deaths$deaths <- malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
-
-malaria_deaths$iso_a2 <- countrycode(malaria_deaths[[2]], "iso3c", "iso2c") 
-
-
-africa <- world %>% 
-    filter(continent == "Africa") %>% 
-    filter(iso_a2 != "EH") %>% #remove easter sahara as NA values
-    left_join(malaria_deaths, by = "iso_a2") %>% 
-    dplyr::select(Entity, Year, deaths) %>% 
-    st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
-
 
 # ui
 ui <- fluidPage(theme = shinytheme("united"),
@@ -66,6 +47,19 @@ ui <- fluidPage(theme = shinytheme("united"),
 
 server <- function(input, output) {
     output$map <- renderLeaflet({
+        
+        tuesdata <- tidytuesdayR::tt_load('2018-11-13')
+        malaria_deaths <- tuesdata$malaria_deaths
+        world <- ne_countries(scale = "medium", returnclass = "sf")
+        malaria_deaths$deaths <- malaria_deaths$`Deaths - Malaria - Sex: Both - Age: Age-standardized (Rate) (per 100,000 people)`
+        malaria_deaths$iso_a2 <- countrycode(malaria_deaths[[2]], "iso3c", "iso2c") 
+        
+        africa <- world %>% 
+            filter(continent == "Africa") %>% 
+            filter(iso_a2 != "EH") %>% #remove easter sahara as NA values
+            left_join(malaria_deaths, by = "iso_a2") %>% 
+            dplyr::select(Entity, Year, deaths) %>% 
+            st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
         
         malaria_year <- africa %>%
             filter(Year == input$year)

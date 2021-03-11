@@ -79,7 +79,7 @@ ui <- fluidPage(
   #shinythemes::themeSelector(),
   # Title
   titlePanel("Carbon Footprint of the World"),
-  # Sidebar layout with input and output definitions
+  #  layout with input and output definitions
   fluidRow(
     
     # panel for inputs
@@ -165,6 +165,12 @@ ui <- fluidPage(
                         style="color: black; background-color: #b2df8a; border-color: #b2df8a;
                         border-radius: 10px; border-width: 2px"
            )),
+    fluidRow(
+      
+      # panel for inputs
+      column(12, 
+             "Carbon")),
+    
   ),
   
 )

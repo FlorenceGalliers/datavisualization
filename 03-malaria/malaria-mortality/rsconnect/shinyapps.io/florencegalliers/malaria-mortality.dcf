@@ -5,8 +5,9 @@ account: florencegalliers
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3763654
-bundleId: 4326100
+bundleId: 4328303
 url: https://florencegalliers.shinyapps.io/malaria-mortality/
-when: 1615380737.31898
+when: 1615418794.81736
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: .RData
