@@ -1,5 +1,7 @@
 # Data Visualization 
 
+![Header](./dataviz-header.png)
+
 This portfolio is for Data Visualisation and Analytics (C7083). It comprises of twelve data visualisation from three different data sources. There is a short introduction to each dataset, as well as some notes about each visualisation. I have included my own personal thoughts and areas I would like to revisit in the future to improve on for each visualisation.
 
 The GitHub Repository containing all data and code for the plots can be found here : https://github.com/FlorenceGalliers/datavisualization
