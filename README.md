@@ -7,35 +7,35 @@ The GitHub Repository containing all data and code for the plots can be found he
 Contents:
 
 
-[1. Carbon Emissions and Food Consumption](#-1-carbon-emissions-and-food-consumption)
+[1. Carbon Emissions and Food Consumption](#1-carbon-emissions-and-food-consumption)
 
-[1.1 Interactive Shiny App: CO2 Emission Comparisons](#-11-interactive-shiny-app)
+[1.1 Interactive Shiny App: CO2 Emission Comparisons](#11-interactive-shiny-app)
 
-[1.2 Base R Graphics: Food Consumption (Boxplot and Strip-Chart)](#-12-base-r-graphics)
+[1.2 Base R Graphics: Food Consumption (Boxplot and Strip-Chart)](#12-base-r-graphics)
 
-[1.3 ggplot2: Carbon Emissions caused by Meat](#-13-ggplot2)
+[1.3 ggplot2: Carbon Emissions caused by Meat](#13-ggplot2)
 
-[1.4 Spatial Data with ggplot: Dairy Consumption in Europe](#-14-spatial-data-with-ggplot)
+[1.4 Spatial Data with ggplot: Dairy Consumption in Europe](#14-spatial-data-with-ggplot)
 
-[2. Meteorites](#-2-meteorites)
+[2. Meteorites](#2-meteorites)
 
-[2.1 Base R Graphics: Meteorites falling over time](#-21-base-r-graphics)
+[2.1 Base R Graphics: Meteorites falling over time](#21-base-r-graphics)
 
-[2.2 ggplot2: Largest 20 meteorites found](#-22-ggplot2)
+[2.2 ggplot2: Largest 20 meteorites found](#22-ggplot2)
 
-[2.3 Interactive Leaflet Map: Meteorite Location and Classification](#-23-interactive-leaflet-map)
+[2.3 Interactive Leaflet Map: Meteorite Location and Classification](#23-interactive-leaflet-map)
 
-[2.4 Interactive Sankey Diagram: Meteorite Summary](#-24-interactive-sankey-diagram)
+[2.4 Interactive Sankey Diagram: Meteorite Summary](#24-interactive-sankey-diagram)
 
-[3. Malaria](#-3-malaria)
+[3. Malaria](#3-malaria)
 
-[3.1 Base R Graphics: Deaths from Malaria (Stacked barplots)](#-31-base-r-graphics)
+[3.1 Base R Graphics: Deaths from Malaria (Stacked barplots)](#31-base-r-graphics)
 
-[3.2 ggplot2: Malaria Incidence Rates in Africa (parallel line plot)](#-32-ggplot2)
+[3.2 ggplot2: Malaria Incidence Rates in Africa (parallel line plot)](#32-ggplot2)
 
-[3.3 Interactive Shiny App with Leaflet Map: Malaria Mortality Rates in Africa](#-33-interactive-shiny-app-with-leaflet-map)
+[3.3 Interactive Shiny App with Leaflet Map: Malaria Mortality Rates in Africa](#33-interactive-shiny-app-with-leaflet-map)
 
-[3.4 Interactive Circle Packing Plot: Malaria Incidence in 2015](#-34-interactive-circle-packing-plot)
+[3.4 Interactive Circle Packing Plot: Malaria Incidence in 2015](#34-interactive-circle-packing-plot)
 
 
 ## 1. Carbon Emissions and Food Consumption
