@@ -3,8 +3,6 @@
 ## Florence Galliers
 ## 2020-02-23
 
-# 62687be994b21b7e75c12ea7eae9d323fcb12982
-
 # Packages ####
 library(shiny)
 library(leaflet)
