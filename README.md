@@ -4,6 +4,8 @@ This portfolio is for Data Visualisation and Analytics (C7083). It comprises of 
 
 The GitHub Repository containing all data and code for the plots can be found here : https://github.com/FlorenceGalliers/datavisualization
 
+Contents:
+
 [1. Carbon Emissions and Food Consumption](#-1.-carbon-emissions-and-food-consumption)
 
 [1.1 Interactive Shiny App: CO2 Emission Comparisons](#-1.1-interactive-shiny-app)
